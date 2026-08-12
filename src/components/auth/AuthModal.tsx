@@ -4,11 +4,8 @@ import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { Loader2, X, Mail, Lock, User as UserIcon, ShieldCheck, Eye, EyeOff, AlertCircle, Sparkles } from "lucide-react";
+import { Loader2, X, Mail, Lock, User as UserIcon, ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "./AuthContext";
-
-const DEMO_EMAIL = "admin@solyn.studio";
-const DEMO_PASSWORD = "admin12345";
 
 export function AuthModal() {
   const { isOpen, tab, next, open, close, setTab } = useAuth();
@@ -144,12 +141,6 @@ function LoginForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fillDemo = () => {
-    setEmail(DEMO_EMAIL);
-    setPassword(DEMO_PASSWORD);
-    setError(null);
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
@@ -212,15 +203,6 @@ function LoginForm({
 
       <button disabled={loading} className="btn mt-1">
         {loading && <Loader2 className="h-4 w-4 animate-spin" />} Войти
-      </button>
-
-      <button
-        type="button"
-        onClick={fillDemo}
-        className="text-[11px] text-muted hover:text-neon-2 transition flex items-center justify-center gap-1.5"
-      >
-        <Sparkles className="h-3 w-3" />
-        Заполнить демо-аккаунт (admin@solyn.studio / admin12345)
       </button>
 
       <p className="text-sm text-muted text-center mt-2">

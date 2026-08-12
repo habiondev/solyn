@@ -46,9 +46,11 @@ function pushUrl(params: URLSearchParams) {
 }
 
 export function CatalogClient({
-  products, compact = false, eyebrow = "Каталог", title = "Все работы", subtitle = "Светильники, постеры и картины. Выберите формат и категорию.",
+  products, sizePreviews = {}, compact = false, eyebrow = "Каталог", title = "Все работы", subtitle = "Светильники, постеры и картины. Выберите формат и категорию.",
 }: {
   products: ProductCardData[];
+  /** URL превью для каждого размера. Если для какого-то ключа нет — будет fallback на picsum. */
+  sizePreviews?: Record<string, string>;
   compact?: boolean;
   eyebrow?: string;
   title?: string;
@@ -268,7 +270,7 @@ export function CatalogClient({
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={getSizePreview(s.key as SizeCat)}
+                              src={getSizePreview(s.key as SizeCat, sizePreviews)}
                               alt={s.label}
                               loading="lazy"
                               className="absolute inset-0 w-full h-full object-cover"
@@ -384,13 +386,13 @@ export function CatalogClient({
   );
 }
 
-/** Превью-фото для каждого пресета размера. */
-function getSizePreview(key: SizeCat): string {
-  const map: Record<SizeCat, string> = {
-    mini: "/uploads/imgs/art-02.jpeg",
-    a4:   "/uploads/imgs/art-04.jpeg",
-    a3:   "/uploads/imgs/art-07.jpeg",
-    large: "/uploads/imgs/art-11.jpeg",
+/** Превью-фото для каждого пресета размера. Использует sizePreviews из props, fallback — picsum. */
+function getSizePreview(key: SizeCat, sizePreviews: Record<string, string> = {}): string {
+  const fallback: Record<SizeCat, string> = {
+    mini:  "https://picsum.photos/seed/solyn-mini/420/594",
+    a4:    "https://picsum.photos/seed/solyn-a4/420/594",
+    a3:    "https://picsum.photos/seed/solyn-a3/420/594",
+    large: "https://picsum.photos/seed/solyn-large/420/594",
   };
-  return map[key];
+  return sizePreviews[key] || fallback[key];
 }

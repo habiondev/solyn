@@ -18,14 +18,27 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   // Все товары разом — фильтрация целиком на клиенте (SPA),
   // чтобы переключение фильтров не дёргало сервер и не сбрасывало скролл.
-  const [productsRaw, reviewsRaw] = await Promise.all([
+  const [productsRaw, reviewsRaw, siteAssets] = await Promise.all([
     prisma.product.findMany({
       where: { active: true },
       include: { images: true },
       orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
     }),
     prisma.review.findMany({ where: { active: true }, orderBy: { createdAt: "desc" }, take: 6 }),
+    prisma.siteAsset.findMany({ where: { category: "size-preview" } }),
   ]);
+
+  // Карта превью размеров: { a4: "url", a3: "url", mini: "url", large: "url" }
+  const sizePreviews: Record<string, string> = {
+    a4:    "https://picsum.photos/seed/solyn-a4/420/594",
+    a3:    "https://picsum.photos/seed/solyn-a3/420/594",
+    mini:  "https://picsum.photos/seed/solyn-mini/420/594",
+    large: "https://picsum.photos/seed/solyn-large/420/594",
+  };
+  for (const a of siteAssets) {
+    const key = a.id.replace("size-preview:", "");
+    if (key) sizePreviews[key] = a.url;
+  }
 
   const products = productsRaw.map((p) => ({
         id: p.id,
@@ -62,6 +75,7 @@ export default async function HomePage() {
           </div>
           <CatalogClient
             products={products}
+            sizePreviews={sizePreviews}
             compact
             eyebrow=""
             title=""

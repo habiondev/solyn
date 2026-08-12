@@ -132,3 +132,20 @@ model Review {
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
 }
+
+/// Контент-ассеты, управляемые из админки.
+/// Используются для: превью карточек размеров (A4/A3/мини), hero-баннеров и т.п.
+model SiteAsset {
+  /// Слаг — уникальный ключ ассета. Например: "size-preview:a4", "hero:main"
+  id        String   @id
+  /// URL картинки (обычно Supabase Storage)
+  url       String
+  /// Alt-текст
+  alt       String   @default("")
+  /// Категория: "size-preview" | "hero" | "banner" | "og"
+  category  String   @default("general")
+  /// Произвольный JSON для дополнительных полей (label, tag и т.п.)
+  meta      Json?
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+}

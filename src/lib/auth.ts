@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 
 export const authConfig: NextAuthConfig = {
   trustHost: true,
+  // На Vercel next-auth сам определяет host из заголовков при trustHost:true.
+  // NEXTAUTH_URL всё ещё нужен, но NextAuth не падает если он пуст — есть fallback.
   session: { strategy: "jwt" },
   // БЕЗ pages.signIn: пусть NextAuth использует свой дефолт (/api/auth/signin).
   // Редирект на попап делает наш кастомный middleware для /login, /register,

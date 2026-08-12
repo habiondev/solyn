@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { ShoppingBag, Image as ImageIcon, Users, LayoutDashboard } from "lucide-react";
+import { ShoppingBag, Image as ImageIcon, Users, LayoutDashboard, Palette } from "lucide-react";
 
 const items = [
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard },
   { href: "/admin/orders", label: "Заказы", icon: ShoppingBag },
   { href: "/admin/products", label: "Товары", icon: ImageIcon },
+  { href: "/admin/content", label: "Контент сайта", icon: Palette },
   { href: "/admin/users", label: "Пользователи", icon: Users },
 ];
 
