@@ -1,0 +1,134 @@
+// Prisma schema for Solyn Studio
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ProductCategory {
+  LAMP
+  POSTER
+  PAINTING
+  SET
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  passwordHash  String?
+  role          Role           @default(USER)
+  createdAt     DateTime       @default(now())
+  orders        Order[]
+  customDesigns CustomDesign[]
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    ProductCategory
+  description String
+  sizeLabel   String   // "A4", "A3", "мини" или "30×40 см" для своего
+  width       Int      // mm
+  height      Int      // mm
+  basePrice   Int      // в копейках/центах (например 14900 = 149₼)
+  // Цена со скидкой (опционально, в копейках). Процент рассчитывается на лету.
+  discountPrice Int?
+  hasFrame    Boolean  @default(true)
+  hasBacklight Boolean @default(true)
+  stock       Int      @default(10) // legacy: в UI не показываем
+  rating      Float    @default(4.8)
+  active      Boolean  @default(true)
+  featured    Boolean  @default(false)
+  tags        String[] // ["новинка","хит","неон","природа"]
+  images      ProductImage[]
+  orderItems  OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String  @default("")
+  isPrimary Boolean @default(false)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model CustomDesign {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  title       String
+  imageUrl    String
+  width       Int
+  height      Int
+  hasFrame    Boolean  @default(true)
+  hasBacklight Boolean @default(true)
+  finish      String   @default("matte") // matte | glossy | canvas
+  notes       String?
+  totalPrice  Int
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customerName String
+  phone       String
+  email       String?
+  address     String
+  comment     String?
+  status      OrderStatus @default(PENDING)
+  total       Int
+  items       OrderItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  customDesignId String?
+  title       String
+  imageUrl    String?
+  width       Int
+  height      Int
+  hasFrame    Boolean
+  hasBacklight Boolean
+  quantity    Int     @default(1)
+  price       Int
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  author    String
+  rating    Int      @default(5)
+  text      String
+  avatar    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
