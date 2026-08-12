@@ -29,7 +29,7 @@ export function Hero() {
       </div>
 
       {/* Кнопки: появляются вместе с буквами SOLYN, без задержки. */}
-      <div className="mt-7 flex flex-wrap gap-3 justify-center z-10">
+      <div className="mt-7 flex flex-col md:flex-wrap gap-3 md:justify-center z-10">
         <Link href="/#products" className="btn">Смотреть каталог</Link>
         <Link href="/custom" className="btn-ghost">Создать свой дизайн →</Link>
         <button onClick={() => setCollabOpen(true)} className="btn-ghost">

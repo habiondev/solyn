@@ -9,7 +9,7 @@ import { type SizeCat, cn, getSizeCat } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 const CATS: { key: string; label: string }[] = [
-  { key: "LAMP",   label: "Картины-светильники" },
+  { key: "LAMP",   label: "Светильники" },
   { key: "POSTER", label: "Постеры" },
   { key: "SET",    label: "Сеты" },
 ];
@@ -189,7 +189,7 @@ export function CatalogClient({
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 sm:flex-wrap">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                   <input

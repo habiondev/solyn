@@ -182,13 +182,7 @@ export function Nav() {
                 {l.label}
               </Link>
             ))}
-            <button
-              type="button"
-              onClick={openCustom}
-              className="px-4 py-3 rounded-xl bg-neon/10 text-neon-2 border border-neon/30 font-display font-semibold text-left flex items-center gap-2"
-            >
-              <Wand2 className="h-4 w-4" /> Своё фото · свой размер
-            </button>
+        
             {!session?.user && (
               <button
                 type="button"

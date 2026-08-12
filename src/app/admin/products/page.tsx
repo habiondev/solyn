@@ -54,7 +54,7 @@ export default async function AdminProducts({ searchParams }: { searchParams: SP
               Все <span className="text-muted ml-1">{all}</span>
             </a>
             <a href="/admin/products?cat=LAMP" className={`chip ${cat === "LAMP" ? "chip-on" : ""}`}>
-              Картины-светильники <span className="text-muted ml-1">{byCat.LAMP || 0}</span>
+              Светильники<span className="text-muted ml-1">{byCat.LAMP || 0}</span>
             </a>
             <a href="/admin/products?cat=POSTER" className={`chip ${cat === "POSTER" ? "chip-on" : ""}`}>
               Постеры <span className="text-muted ml-1">{byCat.POSTER || 0}</span>
