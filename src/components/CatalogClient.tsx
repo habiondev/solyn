@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, SlidersHorizontal, X, ChevronLeft, Wand2, Ruler, Construction } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronLeft, Wand2, Ruler, Construction, Sparkles } from "lucide-react";
 import { ProductCard, type ProductCardData } from "./ProductCard";
 import { type SizeCat, cn, getSizeCat } from "@/lib/utils";
 import toast from "react-hot-toast";
@@ -161,6 +161,14 @@ export function CatalogClient({
         </div>
       )}
 
+      {/* Promo line */}
+      <div className="mb-6 flex justify-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon/10 border border-neon/20 text-neon text-sm font-display font-bold uppercase tracking-wider animate-pulse">
+          <Sparkles className="h-4 w-4" />
+          При заказе от 3 товаров скидка 20%
+        </div>
+      </div>
+
       <AnimatePresence mode="wait">
         {mode === "browse" ? (
           <motion.div
@@ -171,7 +179,8 @@ export function CatalogClient({
             transition={{ duration: 0.25 }}
           >
             {/* Верх: фильтры категорий + поиск/сортировка */}
-            <div className="flex flex-wrap items-center gap-3 justify-between mb-6">
+            <div className="flex flex-col gap-4 mb-6">
+              {/* Row 1: Categories */}
               <div className="flex flex-wrap gap-2">
                 <button onClick={() => onCat(undefined)} className={cn("chip", !cat && "chip-on")}>Все</button>
                 {CATS.map((c) => (
@@ -189,27 +198,52 @@ export function CatalogClient({
                   </button>
                 )}
               </div>
-              <div className="flex items-center gap-2 sm:flex-wrap">
-                <div className="relative">
+
+              {/* Row 2: Search + Sort */}
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Поиск…"
-                    className="input pl-9 h-10 w-56"
+                    placeholder="Поиск по названию…"
+                    className="input pl-9 h-10 w-full"
                   />
                 </div>
-                <button onClick={() => setOpen(true)} className="h-10 px-3 inline-flex items-center gap-2 rounded-full border border-line hover:border-neon text-sm">
-                  <SlidersHorizontal className="h-4 w-4" /> Сортировка
+                <button 
+                  onClick={() => setOpen(true)} 
+                  className="h-10 px-3 inline-flex items-center gap-2 rounded-full border border-line hover:border-neon text-sm bg-card shrink-0"
+                >
+                  <SlidersHorizontal className="h-4 w-4" /> 
+                  <span className="hidden sm:inline">Сортировка</span>
                 </button>
+              </div>
+
+              {/* Row 3: Size presets (Mobile only / Row style) */}
+              <div className="flex sm:hidden overflow-x-auto pb-2 -mx-4 px-4 gap-2 scrollbar-hide">
+                {SIZE_PRESETS.filter(s => s.key !== "photo").map((s) => (
+                  <button
+                    key={s.key}
+                    onClick={() => setSize((cur) => (cur === s.key ? "all" : s.key as SizeCat | "custom"))}
+                    className={cn(
+                      "flex flex-col items-center justify-center min-w-[80px] h-[70px] rounded-xl border transition-all",
+                      size === s.key 
+                        ? "border-neon bg-neon/10 text-neon shadow-[0_0_12px_rgba(51,224,125,.2)]" 
+                        : "border-line bg-card text-muted"
+                    )}
+                  >
+                    <span className="font-display font-bold text-xs uppercase">{s.label}</span>
+                    <span className="text-[9px] opacity-60 mt-0.5">{s.tag}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* 5 карточек в одном ряду: A4, A3, мини, Свой, Своё фото */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-4">
+            {/* Desktop Size Presets Grid */}
+            <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
               {SIZE_PRESETS.map((s) => {
                 const isPhoto: boolean = s.key === "photo";
-                const photoActive: boolean = isPhoto && (mode as string) === "custom";
+                const photoActive: boolean = isPhoto && mode === "custom";
                 const active: boolean = isPhoto ? photoActive : size === s.key;
                 const maxH = 110;
                 const maxW = 90;
@@ -221,13 +255,13 @@ export function CatalogClient({
                     key={s.key}
                     onClick={() => {
                       if (isPhoto) {
-                        toast("Конструктор в разработке — скоро будет доступен! 🎨", { icon: "✨" });
+                        setMode("custom");
                         return;
                       }
                       setSize((cur) => (cur === s.key ? "all" : s.key as SizeCat | "custom"));
                     }}
                     className={cn(
-                      "group relative rounded-2xl border bg-card overflow-hidden text-left transition-all h-[140px] sm:h-[170px]",
+                      "group relative rounded-2xl border bg-card overflow-hidden text-left transition-all h-[170px]",
                       active
                         ? "border-neon shadow-[0_0_24px_rgba(51,224,125,.28)]"
                         : "border-line hover:border-neon/60"
@@ -236,29 +270,29 @@ export function CatalogClient({
                     <div className={cn("absolute inset-0 transition-opacity pointer-events-none", active ? "opacity-100" : "opacity-0 group-hover:opacity-50")}>
                       <div className="absolute -top-10 -right-10 h-20 w-22 rounded-full blur-2xl bg-neon/20" />
                     </div>
-                    <div className="relative h-full flex flex-col items-center justify-center gap-1.5 my-1 sm:gap-2 p-2 sm:p-3">
+                    <div className="relative h-full flex flex-col items-center justify-center gap-2 p-3">
                       <div className="flex-1 w-full grid place-items-center">
                         {isPhoto ? (
                           <div
                             className={cn(
-                              "h-12 w-12 sm:h-14 sm:w-14 rounded-full grid place-items-center border transition",
+                              "h-14 w-14 rounded-full grid place-items-center border transition",
                               active
                                 ? "border-neon bg-neon/20 text-neon shadow-[0_0_18px_rgba(51,224,125,.45)]"
                                 : "border-line bg-neon/10 text-neon-2 group-hover:border-neon group-hover:text-neon"
                             )}
                           >
-                            <Wand2 className="h-5 w-5 sm:h-6 sm:w-6" />
+                            <Wand2 className="h-6 w-6" />
                           </div>
                         ) : s.key === "custom" ? (
                           <div
                             className={cn(
-                              "h-12 w-12 sm:h-14 sm:w-14 rounded-full grid place-items-center border transition",
+                              "h-14 w-14 rounded-full grid place-items-center border transition",
                               active
                                 ? "border-neon bg-neon/20 text-neon shadow-[0_0_18px_rgba(51,224,125,.45)]"
                                 : "border-line bg-neon/10 text-neon-2 group-hover:border-neon group-hover:text-neon"
                             )}
                           >
-                            <Ruler className="h-5 w-5 sm:h-6 sm:w-6" />
+                            <Ruler className="h-6 w-6" />
                           </div>
                         ) : (
                           <div
@@ -270,7 +304,7 @@ export function CatalogClient({
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={getSizePreview(s.key as SizeCat, sizePreviews)}
+                              src={getSizePreview(s.key as SizeCat, cat, sizePreviews)}
                               alt={s.label}
                               loading="lazy"
                               className="absolute inset-0 w-full h-full object-cover"
@@ -285,10 +319,10 @@ export function CatalogClient({
                         )}
                       </div>
                       <div className="text-center">
-                        <div className={cn("font-display font-bold text-sm sm:text-[15px] leading-none", active ? "text-neon" : "text-white")}>
+                        <div className={cn("font-display font-bold text-[15px] leading-none", active ? "text-neon" : "text-white")}>
                           {s.label}
                         </div>
-                        <div className="text-[10px] sm:text-[11px] text-muted mt-0.5 sm:mt-1 uppercase tracking-[.15em] font-display">
+                        <div className="text-[11px] text-muted mt-1 uppercase tracking-[.15em] font-display">
                           {s.tag}
                         </div>
                       </div>
@@ -296,6 +330,24 @@ export function CatalogClient({
                   </button>
                 );
               })}
+            </div>
+
+            {/* Mobile Constructor Promo Banner */}
+            <div className="sm:hidden mb-6">
+              <button 
+                onClick={() => setMode("custom")}
+                className="w-full relative rounded-2xl border border-neon/30 bg-card overflow-hidden p-4 flex items-center gap-4 group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-neon/10 to-transparent pointer-events-none" />
+                <div className="h-12 w-12 rounded-full bg-neon/20 grid place-items-center shrink-0 border border-neon/40">
+                  <Wand2 className="h-6 w-6 text-neon animate-pulse" />
+                </div>
+                <div className="text-left">
+                  <div className="font-display font-bold text-sm text-white uppercase tracking-wider">Свой дизайн</div>
+                  <div className="text-[11px] text-muted">Загрузите фото и создайте свой постер</div>
+                </div>
+                <ChevronLeft className="h-5 w-5 text-neon ml-auto rotate-180 opacity-60 group-hover:opacity-100 transition-opacity" />
+              </button>
             </div>
 
             {items.length === 0 ? (
@@ -387,12 +439,13 @@ export function CatalogClient({
 }
 
 /** Превью-фото для каждого пресета размера. Использует sizePreviews из props, fallback — picsum. */
-function getSizePreview(key: SizeCat, sizePreviews: Record<string, string> = {}): string {
+function getSizePreview(key: SizeCat, cat?: string, sizePreviews: Record<string, string> = {}): string {
+  const specificKey = cat ? `${cat}:${key}` : key;
   const fallback: Record<SizeCat, string> = {
     mini:  "https://picsum.photos/seed/solyn-mini/420/594",
     a4:    "https://picsum.photos/seed/solyn-a4/420/594",
     a3:    "https://picsum.photos/seed/solyn-a3/420/594",
     large: "https://picsum.photos/seed/solyn-large/420/594",
   };
-  return sizePreviews[key] || fallback[key];
+  return sizePreviews[specificKey] || sizePreviews[key] || fallback[key];
 }

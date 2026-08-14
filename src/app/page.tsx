@@ -28,7 +28,7 @@ export default async function HomePage() {
     prisma.siteAsset.findMany({ where: { category: "size-preview" } }),
   ]);
 
-  // Карта превью размеров: { a4: "url", a3: "url", mini: "url", large: "url" }
+  // Карта превью размеров: { a4: "url", "LAMP:a4": "url", ... }
   const sizePreviews: Record<string, string> = {
     a4:    "https://picsum.photos/seed/solyn-a4/420/594",
     a3:    "https://picsum.photos/seed/solyn-a3/420/594",
@@ -36,6 +36,7 @@ export default async function HomePage() {
     large: "https://picsum.photos/seed/solyn-large/420/594",
   };
   for (const a of siteAssets) {
+    // a.id может быть "size-preview:a4" или "size-preview:LAMP:a4"
     const key = a.id.replace("size-preview:", "");
     if (key) sizePreviews[key] = a.url;
   }

@@ -21,10 +21,22 @@ const CATEGORIES: { key: string; label: string; hint: string }[] = [
 ];
 
 const SIZE_PRESETS = [
-  { id: "size-preview:a4",    label: "A4",    tag: "21×30 см" },
-  { id: "size-preview:a3",    label: "A3",    tag: "30×42 см" },
-  { id: "size-preview:mini",  label: "мини",  tag: "12×18 см" },
-  { id: "size-preview:large", label: "большой", tag: "50×70 см" },
+  { id: "size-preview:a4",    label: "A4 (Общий)",    tag: "21×30 см" },
+  { id: "size-preview:a3",    label: "A3 (Общий)",    tag: "30×42 см" },
+  { id: "size-preview:mini",  label: "мини (Общий)",  tag: "12×18 см" },
+  { id: "size-preview:large", label: "большой (Общий)", tag: "50×70 см" },
+
+  { id: "size-preview:LAMP:a4",    label: "A4 (Светильники)",    tag: "21×30 см" },
+  { id: "size-preview:LAMP:a3",    label: "A3 (Светильники)",    tag: "30×42 см" },
+  { id: "size-preview:LAMP:mini",  label: "мини (Светильники)",  tag: "12×18 см" },
+
+  { id: "size-preview:POSTER:a4",  label: "A4 (Постеры)",  tag: "21×30 см" },
+  { id: "size-preview:POSTER:a3",  label: "A3 (Постеры)",  tag: "30×42 см" },
+  { id: "size-preview:POSTER:mini",label: "мини (Постеры)",tag: "12×18 см" },
+
+  { id: "size-preview:SET:a4",     label: "A4 (Сеты)",     tag: "21×30 см" },
+  { id: "size-preview:SET:a3",     label: "A3 (Сеты)",     tag: "30×42 см" },
+  { id: "size-preview:SET:mini",   label: "мини (Сеты)",   tag: "12×18 см" },
 ];
 
 export function ContentClient({ initial }: { initial: ContentAsset[] }) {
@@ -98,21 +110,33 @@ export function ContentClient({ initial }: { initial: ContentAsset[] }) {
           </div>
 
           {cat.key === "size-preview" ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {SIZE_PRESETS.map((p) => {
-                const item = getById(p.id);
-                return (
-                  <SizePreviewCard
-                    key={p.id}
-                    presetId={p.id}
-                    label={p.label}
-                    tag={p.tag}
-                    initial={item}
-                    onSave={save}
-                    onRemove={remove}
-                  />
-                );
-              })}
+            <div className="space-y-6">
+              {[
+                { label: "Общие", filter: (p: any) => !p.id.includes(":LAMP:") && !p.id.includes(":POSTER:") && !p.id.includes(":SET:") },
+                { label: "Светильники", filter: (p: any) => p.id.includes(":LAMP:") },
+                { label: "Постеры", filter: (p: any) => p.id.includes(":POSTER:") },
+                { label: "Сеты", filter: (p: any) => p.id.includes(":SET:") },
+              ].map((group) => (
+                <div key={group.label} className="space-y-3">
+                  <h3 className="text-xs font-display font-bold text-muted uppercase tracking-widest pl-1">{group.label}</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {SIZE_PRESETS.filter(group.filter).map((p) => {
+                      const item = getById(p.id);
+                      return (
+                        <SizePreviewCard
+                          key={p.id}
+                          presetId={p.id}
+                          label={p.label}
+                          tag={p.tag}
+                          initial={item}
+                          onSave={save}
+                          onRemove={remove}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           ) : (
             <GenericCategory

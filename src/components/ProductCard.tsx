@@ -53,21 +53,28 @@ export function ProductCard({ p, onOrder }: { p: ProductCardData; onOrder?: () =
             </div>
           )}
           {p.tags?.[0] && (
-            <span className="absolute top-2.5 left-2.5 text-[10px] uppercase tracking-[.15em] font-display bg-neon text-inkDim px-2.5 py-1 rounded-full">
+            <span className="absolute top-2.5 left-2.5 text-[10px] uppercase tracking-[.15em] font-display bg-neon text-inkDim px-2.5 py-1 rounded-full z-10">
               {p.tags[0]}
             </span>
           )}
           {onSale && (
-            <span className="absolute top-2.5 right-2.5 text-[10px] uppercase tracking-[.15em] font-display bg-rose-500 text-white px-2.5 py-1 rounded-full shadow-[0_0_18px_rgba(244,63,94,.55)]">
+            <span 
+              className={cn(
+                "absolute text-[10px] uppercase tracking-[.15em] font-display bg-rose-500 text-white px-2.5 py-1 rounded-full shadow-[0_0_18px_rgba(244,63,94,.55)] z-10",
+                p.tags?.[0] ? "top-[38px] left-2.5" : "top-2.5 right-2.5"
+              )}
+            >
               −{discountPct}%
             </span>
           )}
         </div>
       </Link>
-      <div className="p-4 flex flex-col gap-1.5">
+      <div className="p-4 flex flex-col gap-1.5 flex-1">
         <div className="label-tiny">{p.sizeLabel} · {p.category === "LAMP" ? "светильник" : p.category === "POSTER" ? "постер" : p.category === "SET" ? "сет" : "картина"}</div>
-        <h3 className="font-display font-semibold text-[16px] leading-tight">{p.title}</h3>
-        <div className="flex items-center justify-between mt-2 gap-2">
+        <div className="min-h-[2.5rem] flex items-center">
+          <h3 className="font-display font-semibold text-[15px] sm:text-[16px] leading-tight line-clamp-2">{p.title}</h3>
+        </div>
+        <div className="flex items-center justify-between mt-auto pt-2 gap-2">
           <div className="flex items-baseline gap-2 min-w-0">
             {onSale ? (
               <>

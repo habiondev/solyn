@@ -13,7 +13,7 @@ export function useReveal() {
     }
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add("in")),
-      { threshold: 0, rootMargin: "0px 0px -50px 0px" }
+      { threshold: 0, rootMargin: "0px 0px 100px 0px" }
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
