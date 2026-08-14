@@ -37,7 +37,7 @@ export function Nav() {
       const currentScrollY = window.scrollY;
       setScrolled(currentScrollY > 8);
       
-      if (currentScrollY < 10) {
+      if (currentScrollY < 50) {
         setVisible(true);
       } else if (currentScrollY > lastScrollY) {
         setVisible(false); // Scrolling down
@@ -88,7 +88,7 @@ export function Nav() {
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
         scrolled
-          ? "backdrop-blur-md bg-[rgba(6,6,28,.72)] border-b border-line"
+          ? "backdrop-blur-md bg-[rgba(6,6,28,.72)]"
           : "bg-transparent"
       )}
     >
@@ -205,7 +205,7 @@ export function Nav() {
       {/* Mobile Language Bar */}
       <div 
         className={cn(
-          "sm:hidden transition-all duration-300 border-t border-line/30 bg-navy-950/80 backdrop-blur-md overflow-hidden",
+          "sm:hidden transition-all duration-300 bg-navy-950/80 backdrop-blur-md overflow-hidden",
           visible ? "h-[44px] opacity-100" : "h-0 opacity-0"
         )}
       >

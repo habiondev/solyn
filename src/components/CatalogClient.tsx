@@ -27,14 +27,14 @@ type PresetKey2 = SizeCat | "custom" | "photo";
 const SIZE_PRESETS = (t: any): { key: PresetKey2; label: string; tag: string; w?: number; h?: number }[] => [
   { key: "a4",     label: "A4",        tag: "21×30 см",   w: 210, h: 297 },
   { key: "a3",     label: "A3",        tag: "30×42 см",   w: 297, h: 420 },
-  { key: "mini",   label: "МИНИ",      tag: "12×8 см",   w: 150, h: 200 },
+  { key: "mini",   label: "МИНИ",      tag: "6×9 см",     w: 60, h: 90 },
   { key: "custom", label: t("catalog.custom_size") || "ДРУГОЙ",      tag: t("product.size"),                            },
   { key: "photo",  label: t("catalog.photo") || "СВОЁ ФОТО", tag: t("catalog.photo_desc") || "конструктор",                      },
 ];
 
 // «Свой размер» = всё, что не a4, не a3, не mini.
 function isCustomProduct(p: ProductCardData): boolean {
-  if (p.sizeLabel === "A4" || p.sizeLabel === "A3" || p.sizeLabel === "мини") return false;
+  if (p.sizeLabel === "A4" || p.sizeLabel === "A3" || p.sizeLabel === "МИНИ") return false;
   return getSizeCat(p.width || 300, p.height || 400) === "large";
 }
 
@@ -72,6 +72,12 @@ export function CatalogClient({
   const [customH, setCustomH] = useState<number>(+(sp?.get("h") || 40));
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"browse" | "custom">("browse");
+  const [visibleCount, setVisibleCount] = useState(12);
+
+  // Сброс счетчика при смене фильтров
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [cat, size, search, sort]);
 
   // Синхронизация state → URL (без скролла, без навигации)
   useEffect(() => {
@@ -362,13 +368,26 @@ export function CatalogClient({
                 {t("catalog.empty")}
               </div>
             ) : (
-              <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {items.map((p) => (
-                  <motion.div key={p.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                    <ProductCard p={p} />
-                  </motion.div>
-                ))}
-              </motion.div>
+              <>
+                <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {items.slice(0, visibleCount).map((p) => (
+                    <motion.div key={p.id} layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                      <ProductCard p={p} />
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {visibleCount < items.length && (
+                  <div className="mt-12 text-center">
+                    <button
+                      onClick={() => setVisibleCount((prev) => prev + 4)}
+                      className="btn-ghost min-w-[200px]"
+                    >
+                      {t("catalog.show_more") || "Показать ещё"}
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </motion.div>
         ) : (

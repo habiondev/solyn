@@ -68,7 +68,7 @@ export default async function HomePage() {
       <Hero />
       <HomeReveal />
 
-      <section id="products" data-catalog className="py-16 md:py-20">
+      <section id="products" data-catalog className="">
         <div className="container-x reveal">
           <div className="text-center mb-7">
          

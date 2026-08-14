@@ -65,7 +65,7 @@ export const POSTER_SIZES = [
 export type SizeCat = "mini" | "a4" | "a3" | "large";
 
 export const SIZE_CATS: { key: SizeCat; label: string; w: number; h: number; hint: string; tag: string }[] = [
-  { key: "mini", label: "мини", w: 150, h: 200, hint: "Настольный", tag: "компакт" },
+  { key: "mini", label: "МИНИ", w: 60, h: 90, hint: "Компактный", tag: "6×9 см" },
   { key: "a4",   label: "A4",   w: 210, h: 297, hint: "Стандарт",  tag: "21×30 см" },
   { key: "a3",   label: "A3",   w: 297, h: 420, hint: "Акцент",    tag: "30×40 см" },
 ];
@@ -73,9 +73,9 @@ export const SIZE_CATS: { key: SizeCat; label: string; w: number; h: number; hin
 /** Определяем категорию формата по ширине/высоте в мм. */
 export function getSizeCat(width: number, height: number): SizeCat {
   const w = Math.min(width, height);
-  if (w <= 220) return "mini";
-  if (w <= 270) return "a4";
-  if (w <= 360) return "a3";
+  if (w <= 120) return "mini";
+  if (w <= 220) return "a4";
+  if (w <= 320) return "a3";
   return "large";
 }
 
