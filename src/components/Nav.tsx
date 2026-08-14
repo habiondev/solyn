@@ -22,6 +22,8 @@ const links = [
 export function Nav() {
   const { lang, setLang, t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
+  const [visible, setVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [mobile, setMobile] = useState(false);
   const [menu, setMenu] = useState(false);
   const { data: session } = useSession();
@@ -31,11 +33,24 @@ export function Nav() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrolled(currentScrollY > 8);
+      
+      if (currentScrollY < 10) {
+        setVisible(true);
+      } else if (currentScrollY > lastScrollY) {
+        setVisible(false); // Scrolling down
+      } else {
+        setVisible(true); // Scrolling up
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [lastScrollY]);
 
   const openCustom = () => {
     setMobile(false);
@@ -71,7 +86,7 @@ export function Nav() {
   return (
     <nav
       className={cn(
-        "fixed top-0 left-0 right-0 z-40 transition-all",
+        "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
         scrolled
           ? "backdrop-blur-md bg-[rgba(6,6,28,.72)] border-b border-line"
           : "bg-transparent"
@@ -97,11 +112,6 @@ export function Nav() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Mobile Lang Switcher */}
-          <div className="sm:hidden mr-1">
-            <LangSwitcher />
-          </div>
-
           {/* Соцсети: Instagram + Threads */}
           <a
             href="https://instagram.com/solyn.az"
@@ -189,6 +199,18 @@ export function Nav() {
           >
             <Menu className="h-4 w-4" />
           </button>
+        </div>
+      </div>
+
+      {/* Mobile Language Bar */}
+      <div 
+        className={cn(
+          "sm:hidden transition-all duration-300 border-t border-line/30 bg-navy-950/80 backdrop-blur-md overflow-hidden",
+          visible ? "h-[44px] opacity-100" : "h-0 opacity-0"
+        )}
+      >
+        <div className="container-x h-full flex items-center justify-center">
+          <LangSwitcher />
         </div>
       </div>
 
