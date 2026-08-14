@@ -67,17 +67,6 @@ export function CatalogClient({
   const [customH, setCustomH] = useState<number>(+(sp?.get("h") || 40));
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<"browse" | "custom">("browse");
-  // detect mobile (client-side only)
-  const [isMobile, setIsMobile] = useState<boolean>(false);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < 640);
-    onResize();
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // animation duration adjusted for mobile to avoid flicker/invisibility
-  const animateDuration = isMobile ? 0 : 0.25;
 
   // Синхронизация state → URL (без скролла, без навигации)
   useEffect(() => {
@@ -172,14 +161,14 @@ export function CatalogClient({
         </div>
       )}
 
-      <AnimatePresence mode="popLayout">
+      <AnimatePresence mode="wait">
         {mode === "browse" ? (
           <motion.div
             key="browse"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: animateDuration }}
+            transition={{ duration: 0.25 }}
           >
             {/* Верх: фильтры категорий + поиск/сортировка */}
             <div className="flex flex-wrap items-center gap-3 justify-between mb-6">
@@ -329,7 +318,7 @@ export function CatalogClient({
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: animateDuration }}
+            transition={{ duration: 0.25 }}
           >
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <button onClick={() => setMode("browse")} className="btn-ghost text-sm">
@@ -363,17 +352,6 @@ export function CatalogClient({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Mobile debug badge (visible on <sm only) */}
-      <div className="fixed left-3 bottom-3 z-[9999] sm:hidden">
-        <div className="px-3 py-2 rounded-lg bg-navy-900/90 border border-line text-xs text-muted max-w-[220px]">
-          <div className="font-mono text-[11px] text-white">products: {products.length}</div>
-          <div className="font-mono text-[11px] text-white">items: {items.length}</div>
-          <div className="text-[11px] text-muted">cat: {String(cat ?? "-")}</div>
-          <div className="text-[11px] text-muted">size: {String(size ?? "-")}</div>
-          <div className="text-[11px] text-muted">q: {String(search ?? "-")}</div>
-        </div>
-      </div>
 
       {open && (
         <div className="fixed inset-0 z-[80] bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)}>
