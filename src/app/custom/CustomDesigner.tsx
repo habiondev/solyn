@@ -9,6 +9,7 @@ import { formatPrice, SIZES, calculatePrice, type Finish, cn } from "@/lib/utils
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useTranslation } from "@/lib/i18n";
 
 const TIPS = [
   { icon: "📐", title: "Большое разрешение", text: "Загрузите фото от 1500×2000 px — будет чётче." },
@@ -17,6 +18,7 @@ const TIPS = [
 ];
 
 export function CustomDesigner() {
+  const { t, lang } = useTranslation();
   const { data: session } = useSession();
   const router = useRouter();
   const { add } = useCart();
@@ -31,7 +33,7 @@ export function CustomDesigner() {
   const [hasFrame, setHasFrame] = useState(true);
   const [hasBacklight, setHasBacklight] = useState(true);
   const [finish, setFinish] = useState<Finish>("matte");
-  const [title, setTitle] = useState("Моя картина");
+  const [title, setTitle] = useState(t("designer.my_painting"));
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -47,13 +49,13 @@ export function CustomDesigner() {
   );
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return toast.error("Загрузите изображение");
-    if (file.size > 20 * 1024 * 1024) return toast.error("Максимум 20 МБ");
+    if (!file.type.startsWith("image/")) return toast.error(t("designer.upload_err"));
+    if (file.size > 20 * 1024 * 1024) return toast.error(t("designer.size_err"));
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(file);
     setFilename(file.name);
-    if (title === "Моя картина") setTitle(file.name.replace(/\.[^.]+$/, ""));
+    if (title === t("designer.my_painting")) setTitle(file.name.replace(/\.[^.]+$/, ""));
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -64,7 +66,7 @@ export function CustomDesigner() {
 
   // сохранение проекта (для авторизованных)
   const saveProject = async () => {
-    if (!image) return toast.error("Сначала загрузите фото");
+    if (!image) return toast.error(t("designer.upload_err"));
     if (!session) { openAuth("login", "/custom"); return; }
     setSaving(true);
     try {
@@ -77,26 +79,27 @@ export function CustomDesigner() {
         }),
       });
       if (!res.ok) throw new Error();
-      toast.success("Проект сохранён в личном кабинете");
-    } catch { toast.error("Не удалось сохранить"); }
+      toast.success(t("designer.save_ok"));
+    } catch { toast.error(t("designer.save_err")); }
     finally { setSaving(false); }
   };
 
   const addToCart = () => {
-    if (!image) return toast.error("Сначала загрузите фото");
+    if (!image) return toast.error(t("designer.upload_err"));
     add({
-      id: `custom-${Date.now()}`, type: "custom", title: title || "Свой дизайн",
+      id: `custom-${Date.now()}`, type: "custom", title: title || t("catalog.custom_design"),
       imageUrl: image, width: w, height: h, hasFrame, hasBacklight, price,
     });
+    toast.success(t("designer.cart_ok"));
   };
 
   return (
     <div className="pt-24 pb-16">
       <div className="container-x">
         <div className="text-center mb-7">
-          <div className="eyebrow flex items-center justify-center gap-2"><Sparkles className="h-3.5 w-3.5" /> Конструктор</div>
-          <h1 className="h-section">Создай свою картину</h1>
-          <p className="text-muted mt-3 max-w-[48ch] mx-auto">Загрузите фото, выберите размер и опции. Увидите готовый результат и стоимость.</p>
+          <div className="eyebrow flex items-center justify-center gap-2"><Sparkles className="h-3.5 w-3.5" /> {t("catalog.photo_desc")}</div>
+          <h1 className="h-section">{t("cta.title")}</h1>
+          <p className="text-muted mt-3 max-w-[48ch] mx-auto">{t("cta.desc")}</p>
         </div>
 
         <div className="grid lg:grid-cols-[1fr_400px] gap-6">
@@ -111,7 +114,7 @@ export function CustomDesigner() {
               {image ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={image} alt="превью" className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={image} alt={t("designer.preview")} className="absolute inset-0 w-full h-full object-cover" />
                   {hasBacklight && (
                     <div className="absolute inset-0 pointer-events-none mix-blend-screen" aria-hidden>
                       <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(51,224,125,.22),transparent_60%)]" />
@@ -127,8 +130,8 @@ export function CustomDesigner() {
                   <div className="mx-auto h-14 w-14 rounded-full bg-navy-800 grid place-items-center mb-3">
                     <Upload className="h-5 w-5 text-neon" />
                   </div>
-                  <div className="font-display font-semibold text-white mb-1">Перетащите фото сюда</div>
-                  <div className="text-sm">или нажмите, чтобы выбрать · JPG/PNG до 20 МБ</div>
+                  <div className="font-display font-semibold text-white mb-1">{t("designer.drop_title")}</div>
+                  <div className="text-sm">{t("designer.drop_desc")}</div>
                 </div>
               )}
               <input
@@ -145,24 +148,32 @@ export function CustomDesigner() {
               </div>
             )}
             <div className="mt-5 grid sm:grid-cols-3 gap-3">
-              {TIPS.map((t) => (
-                <div key={t.title} className="rounded-xl border border-line p-3 text-sm">
-                  <div className="text-lg">{t.icon}</div>
-                  <div className="font-display font-semibold mt-1">{t.title}</div>
-                  <div className="text-muted text-[12px] mt-0.5">{t.text}</div>
-                </div>
-              ))}
+              <div className="rounded-xl border border-line p-3 text-sm">
+                <div className="text-lg">📐</div>
+                <div className="font-display font-semibold mt-1">Large Resolution</div>
+                <div className="text-muted text-[12px] mt-0.5">Upload 1500×2000px+ for best results.</div>
+              </div>
+              <div className="rounded-xl border border-line p-3 text-sm">
+                <div className="text-lg">🌗</div>
+                <div className="font-display font-semibold mt-1">Contrast</div>
+                <div className="text-muted text-[12px] mt-0.5">High contrast photos look best with LED.</div>
+              </div>
+              <div className="rounded-xl border border-line p-3 text-sm">
+                <div className="text-lg">🖼</div>
+                <div className="font-display font-semibold mt-1">Formats</div>
+                <div className="text-muted text-[12px] mt-0.5">Portraits and silhouettes work best.</div>
+              </div>
             </div>
           </div>
 
           {/* Опции */}
           <div className="bg-card border border-line rounded-2xl p-5 h-fit lg:sticky lg:top-24">
-            <h2 className="font-display font-semibold text-lg mb-3">Параметры</h2>
+            <h2 className="font-display font-semibold text-lg mb-3">{t("designer.options")}</h2>
 
-            <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Название</label>
+            <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.name")}</label>
             <input value={title} onChange={(e) => setTitle(e.target.value)} className="input mb-3" />
 
-            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Размер</div>
+            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("product.size")}</div>
             <div className="grid grid-cols-4 gap-1.5 mb-3">
               {SIZES.map((s) => (
                 <button
@@ -170,7 +181,7 @@ export function CustomDesigner() {
                   onClick={() => setSizeKey(s.label)}
                   className={cn("chip h-auto py-2", sizeKey === s.label && "chip-on")}
                 >
-                  <div className="font-display font-semibold">{s.label}</div>
+                  <div className="font-display font-semibold">{s.label === "custom" ? t("catalog.custom_size") : s.label}</div>
                   <div className="text-[10px] text-muted">{s.w}×{s.h}</div>
                 </button>
               ))}
@@ -189,13 +200,13 @@ export function CustomDesigner() {
               </div>
             )}
 
-            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Опции</div>
+            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.options")}</div>
             <div className="grid gap-2 mb-3">
-              <Toggle on={hasFrame} onChange={setHasFrame} icon={<Frame className="h-4 w-4" />} title="Рамка" desc="Деревянная, в цвет интерьера" />
-              <Toggle on={hasBacklight} onChange={setHasBacklight} icon={<Lightbulb className="h-4 w-4" />} title="LED-подсветка" desc="Тёплый свет + диммер в комплекте" />
+              <Toggle on={hasFrame} onChange={setHasFrame} icon={<Frame className="h-4 w-4" />} title={t("designer.frame")} desc={t("designer.frame_desc")} />
+              <Toggle on={hasBacklight} onChange={setHasBacklight} icon={<Lightbulb className="h-4 w-4" />} title={t("designer.led")} desc={t("designer.led_desc")} />
             </div>
 
-            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Финиш</div>
+            <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.finish")}</div>
             <div className="grid grid-cols-3 gap-1.5 mb-4">
               {(["matte", "glossy", "canvas"] as Finish[]).map((f) => (
                 <button
@@ -204,34 +215,34 @@ export function CustomDesigner() {
                   className={cn("chip h-auto py-2", finish === f && "chip-on")}
                 >
                   <div className="font-display font-semibold text-[12px]">
-                    {f === "matte" ? "Матовый" : f === "glossy" ? "Глянец" : "Холст"}
+                    {f === "matte" ? t("designer.finish.matte") : f === "glossy" ? t("designer.finish.glossy") : t("designer.finish.canvas")}
                   </div>
                 </button>
               ))}
             </div>
 
-            <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Комментарий (необязательно)</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="input mb-4" placeholder="Например: обрезать поле снизу" />
+            <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.notes")}</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="input mb-4" placeholder={t("designer.notes_placeholder")} />
 
             <div className="rounded-2xl bg-navy-800/60 border border-line p-4 mb-3">
-              <div className="text-xs text-muted uppercase tracking-[.15em] font-display">Стоимость</div>
+              <div className="text-xs text-muted uppercase tracking-[.15em] font-display">{t("designer.cost")}</div>
               <div className="font-display font-bold text-3xl mt-1 text-neon">{formatPrice(price)}</div>
-              <div className="text-[11px] text-muted mt-1">Готово за 2–3 дня · доставка по Баку бесплатно от 200 ₼</div>
+              <div className="text-[11px] text-muted mt-1">{t("designer.ready_msg")}</div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
               <button onClick={saveProject} disabled={saving} className="btn-ghost text-[13px]">
-                <Save className="h-4 w-4" /> Сохранить
+                <Save className="h-4 w-4" /> {t("designer.save")}
               </button>
               <button onClick={addToCart} className="btn text-[13px]">
-                <Send className="h-4 w-4" /> В корзину
+                <Send className="h-4 w-4" /> {t("designer.add")}
               </button>
             </div>
             {!session && (
               <div className="mt-3 text-[12px] text-muted text-center">
-                Чтобы сохранить проект,{" "}
+                {lang === "ru" ? "Чтобы сохранить проект," : lang === "az" ? "Layihəni saxlamaq üçün," : "To save the project,"}{" "}
                 <button type="button" onClick={() => openAuth("login", "/custom")} className="text-neon-2 hover:text-neon">
-                  войдите
+                  {t("nav.login").toLowerCase()}
                 </button>
               </div>
             )}

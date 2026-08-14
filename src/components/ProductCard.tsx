@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "./CartContext";
 import { formatPrice, cn, hasDiscount, getFinalPrice, getDiscountPercent } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 export type ProductCardData = {
   id: string;
@@ -24,10 +25,20 @@ export type ProductCardData = {
 };
 
 export function ProductCard({ p, onOrder }: { p: ProductCardData; onOrder?: () => void }) {
+  const { t } = useTranslation();
   const { add } = useCart();
   const onSale = hasDiscount(p.basePrice, p.discountPrice);
   const finalPrice = getFinalPrice(p.basePrice, p.discountPrice);
   const discountPct = getDiscountPercent(p.basePrice, p.discountPrice);
+
+  const getCategoryLabel = (cat: string) => {
+    switch (cat) {
+      case "LAMP": return t("product.lamp");
+      case "POSTER": return t("product.poster");
+      case "SET": return t("product.set");
+      default: return t("product.painting");
+    }
+  };
 
   return (
     <div className="card-surface group flex flex-col">
@@ -70,7 +81,7 @@ export function ProductCard({ p, onOrder }: { p: ProductCardData; onOrder?: () =
         </div>
       </Link>
       <div className="p-4 flex flex-col gap-1.5 flex-1">
-        <div className="label-tiny">{p.sizeLabel} · {p.category === "LAMP" ? "светильник" : p.category === "POSTER" ? "постер" : p.category === "SET" ? "сет" : "картина"}</div>
+        <div className="label-tiny">{p.sizeLabel} · {getCategoryLabel(p.category)}</div>
         <div className="min-h-[2.5rem] flex items-center">
           <h3 className="font-display font-semibold text-[15px] sm:text-[16px] leading-tight line-clamp-2">{p.title}</h3>
         </div>
@@ -83,11 +94,11 @@ export function ProductCard({ p, onOrder }: { p: ProductCardData; onOrder?: () =
               </>
             ) : (
               <span className="font-display font-bold text-[20px] whitespace-nowrap">
-                {formatPrice(p.basePrice)} <small className="text-xs text-muted font-normal">/ шт</small>
+                {formatPrice(p.basePrice)} <small className="text-xs text-muted font-normal">{t("product.per_pc")}</small>
               </span>
             )}
             {onSale && (
-              <small className="text-[10px] text-rose-300/80 font-display uppercase tracking-[.1em] whitespace-nowrap">/ шт</small>
+              <small className="text-[10px] text-rose-300/80 font-display uppercase tracking-[.1em] whitespace-nowrap">{t("product.per_pc")}</small>
             )}
           </div>
           <button
@@ -105,7 +116,7 @@ export function ProductCard({ p, onOrder }: { p: ProductCardData; onOrder?: () =
               })
             }
             className="h-9 w-9 grid place-items-center rounded-full bg-gradient-to-b from-neon-2 to-neon text-inkDim hover:scale-105 transition shrink-0"
-            aria-label="В корзину"
+            aria-label={t("product.add_to_cart")}
           >
             <ShoppingBag className="h-4 w-4" />
           </button>

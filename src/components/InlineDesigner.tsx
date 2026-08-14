@@ -8,6 +8,7 @@ import { useAuth } from "./auth/AuthContext";
 import { formatPrice, calculatePrice, type Finish, cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { useTranslation } from "@/lib/i18n";
 
 export function InlineDesigner({
   width,
@@ -18,6 +19,7 @@ export function InlineDesigner({
   height: number;
   sizeLabel: string;
 }) {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const router = useRouter();
   const { add } = useCart();
@@ -29,7 +31,7 @@ export function InlineDesigner({
   const [hasFrame, setHasFrame] = useState(true);
   const [hasBacklight, setHasBacklight] = useState(true);
   const [finish, setFinish] = useState<Finish>("matte");
-  const [title, setTitle] = useState("Моя картина");
+  const [title, setTitle] = useState(t("designer.my_painting"));
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -39,13 +41,13 @@ export function InlineDesigner({
   );
 
   const handleFile = (file: File) => {
-    if (!file.type.startsWith("image/")) return toast.error("Загрузите изображение");
-    if (file.size > 20 * 1024 * 1024) return toast.error("Максимум 20 МБ");
+    if (!file.type.startsWith("image/")) return toast.error(t("designer.upload_err"));
+    if (file.size > 20 * 1024 * 1024) return toast.error(t("designer.size_err"));
     const reader = new FileReader();
     reader.onload = () => setImage(reader.result as string);
     reader.readAsDataURL(file);
     setFilename(file.name);
-    if (title === "Моя картина") setTitle(file.name.replace(/\.[^.]+$/, ""));
+    if (title === t("designer.my_painting")) setTitle(file.name.replace(/\.[^.]+$/, ""));
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -55,7 +57,7 @@ export function InlineDesigner({
   };
 
   const saveProject = async () => {
-    if (!image) return toast.error("Сначала загрузите фото");
+    if (!image) return toast.error(t("designer.upload_err"));
     if (!session) { openAuth("login", "/"); return; }
     setSaving(true);
     try {
@@ -68,24 +70,24 @@ export function InlineDesigner({
         }),
       });
       if (!res.ok) throw new Error();
-      toast.success("Проект сохранён в кабинете");
+      toast.success(t("designer.save_ok"));
     } catch {
-      toast.error("Не удалось сохранить");
+      toast.error(t("designer.save_err"));
     } finally {
       setSaving(false);
     }
   };
 
   const addToCart = () => {
-    if (!image) return toast.error("Сначала загрузите фото");
+    if (!image) return toast.error(t("designer.upload_err"));
     add({
       id: `custom-${Date.now()}`,
       type: "custom",
-      title: title || "Свой дизайн",
+      title: title || t("nav.custom"),
       imageUrl: image, width, height,
       hasFrame, hasBacklight, price,
     });
-    toast.success("Добавлено в корзину");
+    toast.success(t("designer.cart_ok"));
   };
 
   return (
@@ -94,7 +96,7 @@ export function InlineDesigner({
       <div className="bg-card border border-line rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="text-xs text-muted uppercase tracking-[.15em] font-display">
-            Превью · {sizeLabel}
+            {t("designer.preview")} · {sizeLabel}
           </div>
           {image && (
             <div className="text-[10px] font-display text-neon-2 flex items-center gap-1">
@@ -111,7 +113,7 @@ export function InlineDesigner({
           {image ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt="превью" className="absolute inset-0 w-full h-full object-cover" />
+              <img src={image} alt={t("designer.preview")} className="absolute inset-0 w-full h-full object-cover" />
               {hasBacklight && (
                 <div className="absolute inset-0 pointer-events-none mix-blend-screen">
                   <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_50%,rgba(51,224,125,.28),transparent_60%)]" />
@@ -124,7 +126,7 @@ export function InlineDesigner({
                 {width}×{height} мм
               </div>
               <div className="absolute bottom-3 right-3 bg-neon/20 backdrop-blur border border-neon rounded-full px-2.5 py-1 text-[10px] font-display text-neon-2 uppercase tracking-[.15em]">
-                {finish === "matte" ? "матовый" : finish === "glossy" ? "глянец" : "холст"}
+                {finish === "matte" ? t("designer.finish.matte") : finish === "glossy" ? t("designer.finish.glossy") : t("designer.finish.canvas")}
               </div>
             </>
           ) : (
@@ -132,10 +134,10 @@ export function InlineDesigner({
               <div className="mx-auto h-14 w-14 rounded-full bg-navy-800 grid place-items-center mb-3">
                 <Upload className="h-5 w-5 text-neon" />
               </div>
-              <div className="font-display font-semibold text-white mb-1">Перетащите фото</div>
-              <div className="text-sm">или нажмите · JPG/PNG до 20 МБ</div>
+              <div className="font-display font-semibold text-white mb-1">{t("designer.drop_title")}</div>
+              <div className="text-sm">{t("designer.drop_desc")}</div>
               <div className="text-[11px] text-muted mt-3">
-                Увидите, как будет выглядеть в размере {width}×{height} мм
+                {t("designer.drop_hint")} {width}×{height} мм
               </div>
             </div>
           )}
@@ -153,27 +155,27 @@ export function InlineDesigner({
           </div>
         )}
         <div className="mt-3 text-[11px] text-muted text-center">
-          💡 Совет: фото от 1500×2000 px будет чётче. Контрастные снимки эффектнее с подсветкой.
+          {t("designer.tip")}
         </div>
       </div>
 
       {/* Правая колонка: настройки */}
       <div className="bg-card border border-line rounded-2xl p-4 h-fit">
-        <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Название</label>
+        <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.name")}</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           className="input mb-3"
-          placeholder="Моя картина"
+          placeholder={t("designer.my_painting")}
         />
 
-        <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Опции</div>
+        <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.options")}</div>
         <div className="grid gap-2 mb-3">
-          <Toggle on={hasFrame} onChange={setHasFrame} icon={<Frame className="h-4 w-4" />} title="Рамка" desc="Деревянная, в цвет интерьера" />
-          <Toggle on={hasBacklight} onChange={setHasBacklight} icon={<Lightbulb className="h-4 w-4" />} title="LED-подсветка" desc="Тёплый свет + диммер в комплекте" />
+          <Toggle on={hasFrame} onChange={setHasFrame} icon={<Frame className="h-4 w-4" />} title={t("designer.frame")} desc={t("designer.frame_desc")} />
+          <Toggle on={hasBacklight} onChange={setHasBacklight} icon={<Lightbulb className="h-4 w-4" />} title={t("designer.led")} desc={t("designer.led_desc")} />
         </div>
 
-        <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Финиш</div>
+        <div className="text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.finish")}</div>
         <div className="grid grid-cols-3 gap-1.5 mb-3">
           {(["matte", "glossy", "canvas"] as Finish[]).map((f) => (
             <button
@@ -182,33 +184,33 @@ export function InlineDesigner({
               className={cn("chip h-auto py-2", finish === f && "chip-on")}
             >
               <div className="font-display font-semibold text-[12px]">
-                {f === "matte" ? "Матовый" : f === "glossy" ? "Глянец" : "Холст"}
+                {f === "matte" ? t("designer.finish.matte") : f === "glossy" ? t("designer.finish.glossy") : t("designer.finish.canvas")}
               </div>
             </button>
           ))}
         </div>
 
-        <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">Комментарий</label>
+        <label className="block text-xs text-muted uppercase tracking-[.15em] font-display mb-1.5">{t("designer.notes")}</label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={2}
           className="input mb-3"
-          placeholder="Например: обрезать поле снизу"
+          placeholder={t("designer.notes_placeholder")}
         />
 
         <div className="rounded-2xl bg-navy-800/60 border border-line p-4 mb-3">
-          <div className="text-xs text-muted uppercase tracking-[.15em] font-display">Стоимость</div>
+          <div className="text-xs text-muted uppercase tracking-[.15em] font-display">{t("designer.cost")}</div>
           <div className="font-display font-bold text-3xl mt-1 text-neon">{formatPrice(price)}</div>
-          <div className="text-[11px] text-muted mt-1">Готово за 2–3 дня · доставка по Баку бесплатно от 200 ₼</div>
+          <div className="text-[11px] text-muted mt-1">{t("designer.ready_msg")}</div>
         </div>
 
         <div className="grid grid-cols-2 gap-2">
           <button onClick={saveProject} disabled={saving} className="btn-ghost text-[13px]">
-            <Save className="h-4 w-4" /> Сохранить
+            <Save className="h-4 w-4" /> {t("designer.save")}
           </button>
           <button onClick={addToCart} className="btn text-[13px]">
-            <Send className="h-4 w-4" /> В корзину
+            <Send className="h-4 w-4" /> {t("designer.add")}
           </button>
         </div>
       </div>

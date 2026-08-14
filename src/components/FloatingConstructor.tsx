@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, ImagePlus, Ruler, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * Плавающая кнопка «Своё фото / свой размер» с автопопапом 3D-превью,
@@ -12,6 +13,7 @@ import Link from "next/link";
  * Клик открывает конструктор inline в каталоге (а не новую страницу).
  */
 export function FloatingConstructor() {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -87,16 +89,16 @@ export function FloatingConstructor() {
                 <div>
                
                   <h3 className="font-display font-bold text-lg leading-tight mt-1">
-                    Создай сам
+                    {t("constructor.floating.title")}
                   </h3>
                   <p className="text-[12px] text-muted mt-1 leading-snug">
-                    Своё изображение и свой размер — за 2 минуты.
+                    {t("constructor.floating.desc")}
                   </p>
                 </div>
                 <button
                   onClick={() => { setOpen(false); setDismissed(true); }}
                   className="h-7 w-7 grid place-items-center rounded-full border border-line text-muted hover:text-white shrink-0"
-                  aria-label="Закрыть"
+                  aria-label={t("catalog.back")}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -106,9 +108,9 @@ export function FloatingConstructor() {
              
 
               <div className="grid grid-cols-3 gap-1.5 px-4 mb-3 text-center">
-                <Mini icon={<ImagePlus className="h-3.5 w-3.5" />} label="фото" />
-                <Mini icon={<Ruler className="h-3.5 w-3.5" />} label="свой мм" />
-                <Mini icon={<Sparkles className="h-3.5 w-3.5" />} label="свет" />
+                <Mini icon={<ImagePlus className="h-3.5 w-3.5" />} label={t("constructor.floating.mini.photo")} />
+                <Mini icon={<Ruler className="h-3.5 w-3.5" />} label={t("constructor.floating.mini.size")} />
+                <Mini icon={<Sparkles className="h-3.5 w-3.5" />} label={t("constructor.floating.mini.light")} />
               </div>
 
               <div className="p-3 pt-0">
@@ -116,7 +118,7 @@ export function FloatingConstructor() {
                   onClick={openConstructor}
                   className="btn w-full"
                 >
-                  Открыть конструктор <ArrowRight className="h-4 w-4" />
+                  {t("constructor.floating.btn")} <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -128,14 +130,14 @@ export function FloatingConstructor() {
       <button
         onClick={openConstructor}
         className="group relative h-14 sm:h-16 pl-4 pr-5 sm:pl-5 sm:pr-6 rounded-full bg-gradient-to-b from-neon-2 to-neon text-inkDim font-display font-bold text-sm shadow-[0_14px_34px_rgba(51,224,125,.45)] hover:-translate-y-0.5 transition flex items-center gap-2.5"
-        aria-label="Открыть конструктор"
+        aria-label={t("constructor.floating.btn")}
       >
         <span className="relative">
           <span className="absolute inset-0 rounded-full bg-inkDim/30 animate-ping" />
           <Sparkles className="h-5 w-5 relative" />
         </span>
-        <span className="hidden sm:inline">Конструктор</span>
-        <span className="sm:hidden">Дизайн</span>
+        <span className="hidden sm:inline">{t("nav.custom")}</span>
+        <span className="sm:hidden">{t("catalog.photo_desc")}</span>
       </button>
     </div>
   );

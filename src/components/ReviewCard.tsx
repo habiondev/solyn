@@ -1,8 +1,12 @@
+"use client";
+
 import { Star } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export type Review = { id: string; author: string; rating: number; text: string; avatar?: string | null };
 
 export function ReviewCard({ r }: { r: Review }) {
+  const { t } = useTranslation();
   return (
     <div className="bg-card border border-line rounded-[18px] p-5 flex flex-col gap-3">
       <div className="text-neon tracking-[3px] text-[15px]">
@@ -17,7 +21,7 @@ export function ReviewCard({ r }: { r: Review }) {
         </div>
         <div>
           <b className="font-display font-semibold text-[14px] block">{r.author}</b>
-          <span className="text-muted text-[12px]">Покупатель Solyn</span>
+          <span className="text-muted text-[12px]">{t("reviews.buyer")}</span>
         </div>
       </div>
     </div>

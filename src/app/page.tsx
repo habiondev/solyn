@@ -11,6 +11,7 @@ import { ThreadsIcon } from "@/components/icons/ThreadsIcon";
 import { Faq } from "@/components/Faq";
 import { CollabCTA } from "@/components/CollabCTA";
 import { HomeReveal } from "@/components/HomeReveal";
+import { T } from "@/components/T";
 import { Sparkles, ImagePlus, Truck, Shield } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -92,24 +93,19 @@ export default async function HomePage() {
       <section id="how" className="py-16 md:py-20">
         <div className="container-x reveal">
           <div className="text-center mb-9">
-            <div className="eyebrow">Процесс Как заказать</div>
-           
+            <div className="eyebrow"><T k="steps.title" /></div>
           </div>
           <Steps />
         </div>
       </section>
 
-      
-
-                    <section id="reviews" className="">
+      <section id="reviews" className="">
         <div className="container-x reveal">
-       
-
           <div className="mt-12">
             <div className="text-center mb-6">
-              <div className="eyebrow">Мы в соцсетях</div>
-              <h3 className="h-section">@solyn.az</h3>
-              <p className="text-muted text-sm mt-2">Следите за нашими работами и backstage в Instagram и Threads.</p>
+              <div className="eyebrow"><T k="socials.eyebrow" /></div>
+              <h3 className="h-section"><T k="socials.title" /></h3>
+              <p className="text-muted text-sm mt-2"><T k="socials.desc" /></p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
               <div className="relative rounded-2xl border border-line overflow-hidden bg-card transition hover:border-neon/40">
@@ -129,7 +125,7 @@ export default async function HomePage() {
                     rel="noreferrer"
                     className="text-[11px] text-neon-2 hover:text-neon"
                   >
-                    Открыть ↗
+                    <T k="socials.open" />
                   </a>
                 </div>
                 <iframe
@@ -141,12 +137,10 @@ export default async function HomePage() {
                 />
                 <noscript>
                   <a href="https://instagram.com/solyn.az" target="_blank" rel="noreferrer" className="block p-6 text-center text-neon-2">
-                    Открыть профиль @solyn.az в Instagram
+                    <T k="socials.open" /> @solyn.az Instagram
                   </a>
                 </noscript>
               </div>
-
-             
             </div>
           </div>
         </div>
@@ -155,8 +149,8 @@ export default async function HomePage() {
       <section id="faq" className="py-16 md:py-20">
         <div className="container-x reveal">
           <div className="text-center mb-9">
-            <div className="eyebrow">FAQ</div>
-            <h2 className="h-section">Частые вопросы</h2>
+            <div className="eyebrow"><T k="faq.eyebrow" /></div>
+            <h2 className="h-section"><T k="faq.title" /></h2>
           </div>
           <Faq />
         </div>

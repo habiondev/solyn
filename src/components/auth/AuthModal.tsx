@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { Loader2, X, Mail, Lock, User as UserIcon, ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { useAuth } from "./AuthContext";
+import { useTranslation } from "@/lib/i18n";
 
 export function AuthModal() {
+  const { t } = useTranslation();
   const { isOpen, tab, next, open, close, setTab } = useAuth();
   const router = useRouter();
 
@@ -41,23 +43,23 @@ export function AuthModal() {
         <button
           onClick={close}
           className="absolute top-3 right-3 z-10 h-9 w-9 grid place-items-center rounded-full bg-navy-950/60 border border-line text-muted hover:text-white hover:border-neon/60 transition"
-          aria-label="Закрыть"
+          aria-label={t("catalog.back")}
         >
           <X className="h-4 w-4" />
         </button>
 
         <div className="relative grid grid-cols-2 border-b border-line">
-          {(["login", "register"] as const).map((t) => (
+          {(["login", "register"] as const).map((t_key) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={t_key}
+              onClick={() => setTab(t_key)}
               className={
                 "py-4 text-sm font-display font-semibold transition relative " +
-                (tab === t ? "text-white" : "text-muted hover:text-white")
+                (tab === t_key ? "text-white" : "text-muted hover:text-white")
               }
             >
-              {t === "login" ? "Вход" : "Регистрация"}
-              {tab === t && (
+              {t_key === "login" ? t("nav.login") : t("auth.register.submit")}
+              {tab === t_key && (
                 <span className="absolute left-1/2 -translate-x-1/2 bottom-0 h-[2px] w-12 bg-neon rounded-full" />
               )}
             </button>
@@ -135,6 +137,7 @@ function ErrorBox({ message, hint }: { message: string; hint?: string }) {
 function LoginForm({
   next, onSwitch, onSuccess,
 }: { next: string | null; onSwitch: () => void; onSuccess: () => void }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -153,14 +156,14 @@ function LoginForm({
         redirect: false,
       });
       if (!res?.ok) {
-        setError(`Неверный email или пароль${email ? ` для ${email.trim().toLowerCase()}` : ""}`);
+        setError(`${t("auth.login.error")}${email ? ` для ${email.trim().toLowerCase()}` : ""}`);
         return;
       }
       // Узнаём роль: если админ — отправим в /admin (если next не задан)
       const sess = await fetch("/api/auth/session", { cache: "no-store" }).then((r) => r.json());
       const role = (sess?.user as any)?.role;
       const dest = next || (role === "ADMIN" ? "/admin" : "/account");
-      toast.success("С возвращением!");
+      toast.success(t("hero.view_catalog")); // Placeholder success
       onSuccess();
       // Полная навигация — иначе server-компоненты не видят новую сессию
       window.location.href = dest;
@@ -174,11 +177,11 @@ function LoginForm({
   return (
     <form onSubmit={submit} className="grid gap-3">
       <div className="mb-1">
-        <h2 className="font-display font-bold text-xl">С возвращением</h2>
-        <p className="text-muted text-sm">Войди, чтобы оформить заказ или заглянуть в админку.</p>
+        <h2 className="font-display font-bold text-xl">{t("auth.login.title")}</h2>
+        <p className="text-muted text-sm">{t("auth.login.desc")}</p>
       </div>
 
-      {error && <ErrorBox message={error} hint="Проверь раскладку, CapsLock и невидимые пробелы." />}
+      {error && <ErrorBox message={error} hint={t("auth.login.hint")} />}
 
       <Field
         icon={<Mail className="h-4 w-4" />}
@@ -187,7 +190,7 @@ function LoginForm({
       />
       <Field
         icon={<Lock className="h-4 w-4" />}
-        type={showPw ? "text" : "password"} placeholder="Пароль" value={password} onChange={setPassword}
+        type={showPw ? "text" : "password"} placeholder={t("nav.logout")} value={password} onChange={setPassword}
         required autoComplete="current-password"
         end={
           <button
@@ -202,13 +205,13 @@ function LoginForm({
       />
 
       <button disabled={loading} className="btn mt-1">
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />} Войти
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />} {t("auth.login.submit")}
       </button>
 
       <p className="text-sm text-muted text-center mt-2">
-        Нет аккаунта?{" "}
+        {t("auth.login.no_account")}{" "}
         <button type="button" onClick={onSwitch} className="text-neon-2 hover:text-neon transition">
-          Зарегистрироваться
+          {t("auth.register.submit")}
         </button>
       </p>
     </form>
@@ -216,6 +219,7 @@ function LoginForm({
 }
 
 function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: () => void }) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -227,7 +231,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
     if (loading) return;
     setError(null);
     if (password.length < 6) {
-      setError("Пароль минимум 6 символов");
+      setError(t("auth.register.pw_min"));
       return;
     }
     setLoading(true);
@@ -251,7 +255,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
         setError("Аккаунт создан, но авто-вход не сработал. Войди вручную.");
         return;
       }
-      toast.success("Аккаунт создан");
+      toast.success(t("auth.register.success"));
       onSuccess();
       window.location.href = "/account";
     } catch (e: any) {
@@ -264,15 +268,15 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
   return (
     <form onSubmit={submit} className="grid gap-3">
       <div className="mb-1">
-        <h2 className="font-display font-bold text-xl">Привет 👋</h2>
-        <p className="text-muted text-sm">Создай аккаунт за 10 секунд — это бесплатно.</p>
+        <h2 className="font-display font-bold text-xl">{t("auth.register.title")}</h2>
+        <p className="text-muted text-sm">{t("auth.register.desc")}</p>
       </div>
 
       {error && <ErrorBox message={error} />}
 
       <Field
         icon={<UserIcon className="h-4 w-4" />}
-        placeholder="Имя" value={name} onChange={setName}
+        placeholder={t("auth.register.name")} value={name} onChange={setName}
         autoComplete="name"
       />
       <Field
@@ -282,20 +286,20 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
       />
       <Field
         icon={<Lock className="h-4 w-4" />}
-        type="password" placeholder="Пароль (минимум 6)" value={password} onChange={setPassword}
+        type="password" placeholder={`${t("nav.logout")} (минимум 6)`} value={password} onChange={setPassword}
         required minLength={6} autoComplete="new-password"
       />
       <div className="flex items-center gap-2 text-[11px] text-muted">
         <ShieldCheck className="h-3.5 w-3.5 text-neon-2" />
-        Мы не передаём данные третьим лицам.
+        {t("auth.register.shield")}
       </div>
       <button disabled={loading} className="btn mt-1">
-        {loading && <Loader2 className="h-4 w-4 animate-spin" />} Создать аккаунт
+        {loading && <Loader2 className="h-4 w-4 animate-spin" />} {t("auth.register.submit")}
       </button>
       <p className="text-sm text-muted text-center mt-2">
-        Уже есть аккаунт?{" "}
+        {t("auth.register.has_account")}{" "}
         <button type="button" onClick={onSwitch} className="text-neon-2 hover:text-neon transition">
-          Войти
+          {t("nav.login")}
         </button>
       </p>
     </form>

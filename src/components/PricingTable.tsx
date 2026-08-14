@@ -1,7 +1,11 @@
+"use client";
+
 import { formatPrice, SIZES, calculatePrice, cn } from "@/lib/utils";
 import { Check } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export function PricingTable() {
+  const { t } = useTranslation();
   return (
     <div className="grid md:grid-cols-3 gap-4 max-w-[820px] mx-auto">
       {SIZES.map((s) => {
@@ -13,14 +17,14 @@ export function PricingTable() {
             <div className="font-display font-bold text-2xl text-neon mb-1">{s.label}</div>
             <div className="text-xs text-muted uppercase tracking-[.15em] font-display">{s.w}×{s.h} мм · {s.hint}</div>
             <div className="mt-5 grid gap-2 text-sm">
-              <Row label="Светильник с подсветкой" value={lamp} hi />
-              <Row label="Картина в раме" value={frame} />
-              <Row label="Постер без рамы" value={noFrame} />
+              <Row label={t("pricing.lamp_glow")} value={lamp} hi />
+              <Row label={t("pricing.painting_frame")} value={frame} />
+              <Row label={t("pricing.poster_no_frame")} value={noFrame} />
             </div>
             <ul className="mt-5 grid gap-1.5 text-[12px] text-muted">
-              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> Печать на премиум-материале</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> LED-подсветка с диммером</li>
-              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> Деревянная рама</li>
+              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> {t("pricing.check_print")}</li>
+              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> {t("pricing.check_led")}</li>
+              <li className="flex items-center gap-1.5"><Check className="h-3 w-3 text-neon" /> {t("pricing.check_frame")}</li>
             </ul>
           </div>
         );

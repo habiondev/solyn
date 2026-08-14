@@ -7,28 +7,29 @@ import { Search, SlidersHorizontal, X, ChevronLeft, Wand2, Ruler, Construction, 
 import { ProductCard, type ProductCardData } from "./ProductCard";
 import { type SizeCat, cn, getSizeCat } from "@/lib/utils";
 import toast from "react-hot-toast";
+import { useTranslation } from "@/lib/i18n";
 
-const CATS: { key: string; label: string }[] = [
-  { key: "LAMP",   label: "Светильники" },
-  { key: "POSTER", label: "Постеры" },
-  { key: "SET",    label: "Сеты" },
+const CATS = (t: any): { key: string; label: string }[] => [
+  { key: "LAMP",   label: t("catalog.lamps") },
+  { key: "POSTER", label: t("catalog.posters") },
+  { key: "SET",    label: t("catalog.sets") },
 ];
 
-const SORTS: { key: string; label: string }[] = [
-  { key: "popular", label: "По популярности" },
-  { key: "new", label: "Новинки" },
-  { key: "price-asc", label: "Цена ↑" },
-  { key: "price-desc", label: "Цена ↓" },
+const SORTS = (t: any): { key: string; label: string }[] => [
+  { key: "popular", label: t("catalog.sort_popular") || "По популярности" },
+  { key: "new", label: t("catalog.sort_new") || "Новинки" },
+  { key: "price-asc", label: t("catalog.sort_price_asc") || "Цена ↑" },
+  { key: "price-desc", label: t("catalog.sort_price_desc") || "Цена ↓" },
 ];
 
 // 5 карточек в одном ряду: A4 → A3 → мини → Свой (фильтр) → Своё фото (конструктор)
 type PresetKey2 = SizeCat | "custom" | "photo";
-const SIZE_PRESETS: { key: PresetKey2; label: string; tag: string; w?: number; h?: number }[] = [
+const SIZE_PRESETS = (t: any): { key: PresetKey2; label: string; tag: string; w?: number; h?: number }[] => [
   { key: "a4",     label: "A4",        tag: "21×30 см",   w: 210, h: 297 },
   { key: "a3",     label: "A3",        tag: "30×42 см",   w: 297, h: 420 },
   { key: "mini",   label: "МИНИ",      tag: "12×8 см",   w: 150, h: 200 },
-  { key: "custom", label: "ДРУГОЙ",      tag: "размер",                            },
-  { key: "photo",  label: "СВОЁ ФОТО", tag: "конструктор",                      },
+  { key: "custom", label: t("catalog.custom_size") || "ДРУГОЙ",      tag: t("product.size"),                            },
+  { key: "photo",  label: t("catalog.photo") || "СВОЁ ФОТО", tag: t("catalog.photo_desc") || "конструктор",                      },
 ];
 
 // «Свой размер» = всё, что не a4, не a3, не mini.
@@ -46,7 +47,7 @@ function pushUrl(params: URLSearchParams) {
 }
 
 export function CatalogClient({
-  products, sizePreviews = {}, compact = false, eyebrow = "Каталог", title = "Все работы", subtitle = "Светильники, постеры и картины. Выберите формат и категорию.",
+  products, sizePreviews = {}, compact = false, eyebrow = "", title = "", subtitle = "",
 }: {
   products: ProductCardData[];
   /** URL превью для каждого размера. Если для какого-то ключа нет — будет fallback на picsum. */
@@ -56,7 +57,11 @@ export function CatalogClient({
   title?: string;
   subtitle?: string;
 }) {
+  const { t } = useTranslation();
   const sp = useSearchParams();
+
+  const currentCats = CATS(t);
+  const currentPresets = SIZE_PRESETS(t);
 
   // Инициализируем state из URL один раз, дальше — независимо.
   const [cat, setCat] = useState<string | undefined>(sp?.get("cat") || undefined);
@@ -155,17 +160,17 @@ export function CatalogClient({
     <div data-catalog className={cn(compact ? "pb-2" : "pt-24 pb-16 container-x")}>
       {!compact && (
         <div className="text-center mb-7">
-          <div className="eyebrow">{eyebrow}</div>
-          <h1 className="h-section">{title}</h1>
-          <p className="text-muted mt-3 max-w-[44ch] mx-auto">{subtitle}</p>
+          <div className="eyebrow">{eyebrow || t("catalog.eyebrow")}</div>
+          <h1 className="h-section">{title || t("catalog.title")}</h1>
+          <p className="text-muted mt-3 max-w-[44ch] mx-auto">{subtitle || t("catalog.subtitle")}</p>
         </div>
       )}
 
       {/* Promo line */}
       <div className="mb-6 flex justify-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon/10 border border-neon/20 text-neon text-sm font-display font-bold uppercase tracking-wider animate-pulse">
-          <Sparkles className="h-4 w-4" />
-          При заказе от 3 товаров скидка 20%
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon/10 border border-neon/20 text-neon text-sm font-display font-bold uppercase tracking-wider animate-pulse text-center">
+          <Sparkles className="h-4 w-4 shrink-0" />
+          {t("catalog.promo")}
         </div>
       </div>
 
@@ -182,8 +187,8 @@ export function CatalogClient({
             <div className="flex flex-col gap-4 mb-6">
               {/* Row 1: Categories */}
               <div className="flex flex-wrap gap-2">
-                <button onClick={() => onCat(undefined)} className={cn("chip", !cat && "chip-on")}>Все</button>
-                {CATS.map((c) => (
+                <button onClick={() => onCat(undefined)} className={cn("chip", !cat && "chip-on")}>{t("catalog.all")}</button>
+                {currentCats.map((c) => (
                   <button
                     key={c.key}
                     onClick={() => onCat(c.key)}
@@ -194,7 +199,7 @@ export function CatalogClient({
                 ))}
                 {size !== "all" && (
                   <button onClick={() => setSize("all")} className="chip text-rose-300 border-rose-400/40">
-                    × сбросить размер
+                    {t("catalog.reset_size")}
                   </button>
                 )}
               </div>
@@ -206,7 +211,7 @@ export function CatalogClient({
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Поиск по названию…"
+                    placeholder={t("catalog.search")}
                     className="input pl-9 h-10 w-full"
                   />
                 </div>
@@ -215,13 +220,13 @@ export function CatalogClient({
                   className="h-10 px-3 inline-flex items-center gap-2 rounded-full border border-line hover:border-neon text-sm bg-card shrink-0"
                 >
                   <SlidersHorizontal className="h-4 w-4" /> 
-                  <span className="hidden sm:inline">Сортировка</span>
+                  <span className="hidden sm:inline">{t("catalog.sort")}</span>
                 </button>
               </div>
 
               {/* Row 3: Size presets (Mobile only / Row style) */}
               <div className="flex sm:hidden overflow-x-auto pb-2 -mx-4 px-4 gap-2 scrollbar-hide">
-                {SIZE_PRESETS.filter(s => s.key !== "photo").map((s) => (
+                {currentPresets.filter(s => s.key !== "photo").map((s) => (
                   <button
                     key={s.key}
                     onClick={() => setSize((cur) => (cur === s.key ? "all" : s.key as SizeCat | "custom"))}
@@ -241,9 +246,11 @@ export function CatalogClient({
 
             {/* Desktop Size Presets Grid */}
             <div className="hidden sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-              {SIZE_PRESETS.map((s) => {
+              {currentPresets.map((s) => {
                 const isPhoto: boolean = s.key === "photo";
-                const photoActive: boolean = isPhoto && mode === "custom";
+                // В этой ветке mode всегда "browse", поэтому photoActive всегда false.
+                // Используем приведение к string, чтобы избежать ошибки типизации "no overlap".
+                const photoActive: boolean = isPhoto && (mode as string) === "custom";
                 const active: boolean = isPhoto ? photoActive : size === s.key;
                 const maxH = 110;
                 const maxW = 90;
@@ -343,8 +350,8 @@ export function CatalogClient({
                   <Wand2 className="h-6 w-6 text-neon animate-pulse" />
                 </div>
                 <div className="text-left">
-                  <div className="font-display font-bold text-sm text-white uppercase tracking-wider">Свой дизайн</div>
-                  <div className="text-[11px] text-muted">Загрузите фото и создайте свой постер</div>
+                  <div className="font-display font-bold text-sm text-white uppercase tracking-wider">{t("catalog.custom_design")}</div>
+                  <div className="text-[11px] text-muted">{t("catalog.custom_desc")}</div>
                 </div>
                 <ChevronLeft className="h-5 w-5 text-neon ml-auto rotate-180 opacity-60 group-hover:opacity-100 transition-opacity" />
               </button>
@@ -352,7 +359,7 @@ export function CatalogClient({
 
             {items.length === 0 ? (
               <div className="text-center text-muted py-16 border border-dashed border-line rounded-2xl">
-                Ничего не нашлось. Попробуйте изменить фильтры.
+                {t("catalog.empty")}
               </div>
             ) : (
               <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -374,7 +381,7 @@ export function CatalogClient({
           >
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <button onClick={() => setMode("browse")} className="btn-ghost text-sm">
-                <ChevronLeft className="h-4 w-4" /> Назад в каталог
+                <ChevronLeft className="h-4 w-4" /> {t("catalog.back")}
               </button>
             </div>
             {/* Плашка «Конструктор в разработке» */}
@@ -382,14 +389,13 @@ export function CatalogClient({
               <div className="inline-flex h-16 w-16 rounded-full bg-neon/15 grid place-items-center mb-4">
                 <Construction className="h-8 w-8 text-neon" />
               </div>
-              <h3 className="font-display font-bold text-2xl text-white mb-2">Конструктор в разработке</h3>
+              <h3 className="font-display font-bold text-2xl text-white mb-2">{t("catalog.dev_title")}</h3>
               <p className="text-muted max-w-[360px] mx-auto leading-relaxed">
-                Совсем скоро здесь можно будет загрузить своё фото, выбрать размер и оформить заказ напрямую.
-                <br />Пока вы можете собрать корзину из готовых работ или написать нам.
+                {t("catalog.dev_desc")}
               </p>
               <div className="mt-6 flex flex-wrap gap-3 justify-center">
                 <button onClick={() => setMode("browse")} className="btn text-sm">
-                  <ChevronLeft className="h-4 w-4" /> В каталог
+                  <ChevronLeft className="h-4 w-4" /> {t("catalog.to_catalog")}
                 </button>
                 <a
                   href="https://wa.me/994555508932?text=Здравствуйте!%20Хочу%20узнать%20о%20своём%20дизайне"
@@ -397,7 +403,7 @@ export function CatalogClient({
                   rel="noreferrer"
                   className="btn-ghost text-sm"
                 >
-                  💬 Написать в WhatsApp
+                  💬 WhatsApp
                 </a>
               </div>
             </div>
@@ -412,13 +418,13 @@ export function CatalogClient({
             className="absolute right-0 top-0 h-full w-full sm:w-[380px] bg-navy-900 border-l border-line p-5"
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-display font-semibold text-lg">Сортировка</h3>
+              <h3 className="font-display font-semibold text-lg">{t("catalog.sort")}</h3>
               <button onClick={() => setOpen(false)} className="h-9 w-9 grid place-items-center rounded-full border border-line">
                 <X className="h-4 w-4" />
               </button>
             </div>
             <div className="grid gap-2">
-              {SORTS.map((s) => (
+              {SORTS(t).map((s) => (
                 <button
                   key={s.key}
                   onClick={() => onSort(s.key)}

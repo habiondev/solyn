@@ -4,8 +4,10 @@ import { useCart } from "./CartContext";
 import { formatPrice, cn } from "@/lib/utils";
 import { X, Trash2, ShoppingBag, ArrowRight, ImageIcon, MessageCircle } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n";
 
 export function CartDrawer() {
+  const { t } = useTranslation();
   const { items, open, setOpen, remove, setQuantity, total, count } = useCart();
   return (
     <div
@@ -29,7 +31,7 @@ export function CartDrawer() {
       >
         <header className="px-5 h-[64px] flex items-center justify-between border-b border-line">
           <div className="font-display font-semibold flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4 text-neon" /> Корзина <span className="text-muted text-sm">· {count}</span>
+            <ShoppingBag className="h-4 w-4 text-neon" /> {t("cart.title")} <span className="text-muted text-sm">· {count}</span>
           </div>
           <button onClick={() => setOpen(false)} className="h-9 w-9 grid place-items-center rounded-full border border-line">
             <X className="h-4 w-4" />
@@ -42,7 +44,7 @@ export function CartDrawer() {
               <div className="mx-auto h-14 w-14 rounded-full bg-card grid place-items-center mb-3">
                 <ShoppingBag className="h-5 w-5" />
               </div>
-              Корзина пустая
+              {t("cart.empty_msg")}
             </div>
           ) : (
             items.map((it) => (
@@ -60,7 +62,7 @@ export function CartDrawer() {
                 <div className="flex-1 min-w-0">
                   <div className="font-display font-semibold truncate">{it.title}</div>
                   <div className="text-[12px] text-muted">
-                    {it.width && it.height ? `${it.width}×${it.height} мм` : "стандарт"} · {it.hasBacklight ? "светится" : "без света"} · {it.hasFrame ? "в раме" : "без рамы"}
+                    {it.width && it.height ? `${it.width}×${it.height} мм` : t("cart.item.standard")} · {it.hasBacklight ? t("cart.item.glow") : t("cart.item.no_glow")} · {it.hasFrame ? t("cart.item.frame") : t("cart.item.no_frame")}
                   </div>
                   <div className="flex items-center justify-between mt-1.5">
                     <div className="flex items-center gap-1.5">
@@ -74,7 +76,7 @@ export function CartDrawer() {
                 <button
                   onClick={() => remove(it.id)}
                   className="h-8 w-8 grid place-items-center rounded-full border border-line text-muted hover:text-rose-300"
-                  aria-label="Удалить"
+                  aria-label={t("catalog.back")}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -85,7 +87,7 @@ export function CartDrawer() {
 
         <footer className="border-t border-line p-5 grid gap-2.5">
           <div className="flex items-center justify-between">
-            <span className="text-muted text-sm">Итого</span>
+            <span className="text-muted text-sm">{t("cart.total")}</span>
             <span className="font-display font-bold text-xl">{formatPrice(total)}</span>
           </div>
           <Link
@@ -93,7 +95,7 @@ export function CartDrawer() {
             onClick={() => setOpen(false)}
             className={cn("btn", items.length === 0 && "pointer-events-none opacity-50")}
           >
-            Оформить заказ <ArrowRight className="h-4 w-4" />
+            {t("cart.checkout_msg")} <ArrowRight className="h-4 w-4" />
           </Link>
           {items.length > 0 && (
             <a
@@ -111,7 +113,7 @@ export function CartDrawer() {
               className="btn-ghost border-[#25d366]/40 text-[#25d366] hover:bg-[#25d366]/10"
             >
               <MessageCircle className="h-4 w-4 fill-[#25d366]" />
-              Заказать в WhatsApp
+              {t("cart.whatsapp_msg")}
             </a>
           )}
         </footer>

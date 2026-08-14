@@ -9,16 +9,18 @@ import { ThreadsIcon } from "@/components/icons/ThreadsIcon";
 import { useCart } from "./CartContext";
 import { useAuth } from "./auth/AuthContext";
 import { cn } from "@/lib/utils";
+import { useTranslation, type Language } from "@/lib/i18n";
 
 const links = [
-  { href: "/#products", label: "Каталог" },
-  { href: "/#how", label: "Процесс" },
-  { href: "/#posters", label: "Постеры" },
-  { href: "/#reviews", label: "Отзывы" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/#products", labelKey: "nav.catalog" },
+  { href: "/#how", labelKey: "nav.process" },
+  { href: "/#posters", labelKey: "nav.posters" },
+  { href: "/#reviews", labelKey: "nav.reviews" },
+  { href: "/#faq", labelKey: "nav.faq" },
 ];
 
 export function Nav() {
+  const { lang, setLang, t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [mobile, setMobile] = useState(false);
   const [menu, setMenu] = useState(false);
@@ -35,8 +37,6 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Кнопка «Свой дизайн» в навбаре: открывает inline-конструктор в каталоге.
-  // Если мы не на главной — переходим на главную с флагом, который откроет конструктор автоматически.
   const openCustom = () => {
     setMobile(false);
     if (pathname === "/") {
@@ -45,6 +45,28 @@ export function Nav() {
       router.push("/?constructor=1#products");
     }
   };
+
+  const LangSwitcher = () => (
+    <div className="flex items-center gap-1 p-0.5 bg-navy-950/40 rounded-full border border-line/60 backdrop-blur-sm">
+      {(["ru", "az", "en"] as Language[]).map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className={cn(
+            "h-7 px-2.5 rounded-full text-[10px] font-bold uppercase tracking-tight transition-all relative overflow-hidden group",
+            lang === l 
+              ? "text-inkDim" 
+              : "text-muted hover:text-white"
+          )}
+        >
+          {lang === l && (
+            <span className="absolute inset-0 bg-gradient-to-b from-neon-2 to-neon shadow-[0_0_12px_rgba(51,224,125,.4)]" />
+          )}
+          <span className="relative z-10">{l}</span>
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <nav
@@ -56,20 +78,30 @@ export function Nav() {
       )}
     >
       <div className="container-x h-[64px] flex items-center justify-between">
-        <Link href="/" className="font-display font-bold text-[20px] tracking-wide">
-          <span className="text-neon">SOLYN</span> <span className="text-white">STUDIO</span>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/" className="font-display font-bold text-[20px] tracking-wide shrink-0">
+            <span className="text-neon">SOLYN</span> <span className="text-white">STUDIO</span>
+          </Link>
+          
+          <div className="hidden sm:block">
+            <LangSwitcher />
+          </div>
+        </div>
 
         <div className="hidden lg:flex items-center gap-7 text-sm text-muted">
           {links.map((l) => (
             <Link key={l.href} href={l.href} className="hover:text-white transition">
-              {l.label}
+              {t(l.labelKey)}
             </Link>
           ))}
-       
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Mobile Lang Switcher */}
+          <div className="sm:hidden mr-1">
+            <LangSwitcher />
+          </div>
+
           {/* Соцсети: Instagram + Threads */}
           <a
             href="https://instagram.com/solyn.az"
@@ -95,7 +127,7 @@ export function Nav() {
           <button
             onClick={() => setOpen(true)}
             className="relative h-10 w-10 grid place-items-center rounded-full border border-line hover:border-neon transition"
-            aria-label="Корзина"
+            aria-label={t("cart.title")}
           >
             <ShoppingBag className="h-4 w-4" />
             {count > 0 && (
@@ -110,7 +142,7 @@ export function Nav() {
               <button
                 onClick={() => setMenu((v) => !v)}
                 className="h-10 w-10 grid place-items-center rounded-full bg-gradient-to-b from-neon-2 to-neon text-inkDim font-display font-bold"
-                aria-label="Аккаунт"
+                aria-label={t("nav.account")}
               >
                 {session.user.name?.[0] || session.user.email?.[0]?.toUpperCase()}
               </button>
@@ -120,22 +152,22 @@ export function Nav() {
                   className="absolute right-0 mt-2 w-56 rounded-2xl bg-navy-900 border border-line shadow-xl overflow-hidden"
                 >
                   <div className="px-4 py-3 border-b border-line">
-                    <div className="text-sm font-display font-semibold">{session.user.name || "Профиль"}</div>
+                    <div className="text-sm font-display font-semibold">{session.user.name || t("nav.account")}</div>
                     <div className="text-xs text-muted truncate">{session.user.email}</div>
                   </div>
                   <Link href="/account" className="flex items-center gap-2 px-4 py-2.5 hover:bg-card text-sm">
-                    <UserIcon className="h-4 w-4" /> Личный кабинет
+                    <UserIcon className="h-4 w-4" /> {t("nav.account")}
                   </Link>
                   {(session.user as any).role === "ADMIN" && (
                     <Link href="/admin" className="flex items-center gap-2 px-4 py-2.5 hover:bg-card text-sm">
-                      <LayoutDashboard className="h-4 w-4" /> Админ-панель
+                      <LayoutDashboard className="h-4 w-4" /> {t("nav.admin")}
                     </Link>
                   )}
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="w-full text-left flex items-center gap-2 px-4 py-2.5 hover:bg-card text-sm text-rose-300"
                   >
-                    <LogOut className="h-4 w-4" /> Выйти
+                    <LogOut className="h-4 w-4" /> {t("nav.logout")}
                   </button>
                 </div>
               )}
@@ -146,7 +178,7 @@ export function Nav() {
               onClick={() => openAuth("login")}
               className="hidden sm:inline-flex btn-ghost"
             >
-              <UserIcon className="h-4 w-4" /> Войти
+              <UserIcon className="h-4 w-4" /> {t("nav.login")}
             </button>
           )}
 
@@ -179,7 +211,7 @@ export function Nav() {
                 onClick={() => setMobile(false)}
                 className="px-4 py-3 rounded-xl border border-line bg-card text-white"
               >
-                {l.label}
+                {t(l.labelKey)}
               </Link>
             ))}
         
@@ -189,7 +221,7 @@ export function Nav() {
                 onClick={() => { setMobile(false); openAuth("login"); }}
                 className="px-4 py-3 rounded-xl bg-gradient-to-b from-neon-2 to-neon text-inkDim font-display font-semibold text-center"
               >
-                Войти
+                {t("nav.login")}
               </button>
             )}
           </div>

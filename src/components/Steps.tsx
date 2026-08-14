@@ -1,11 +1,17 @@
-const ITEMS = [
-  { n: "01", t: "Выбираешь дизайн", d: "Из каталога, отправляешь свою фотографию нам или загружаешь своё фото в конструкторе." },
-  { n: "02", t: "Подбираем размер, и цвет рамки", d: "S, M, L или XL. Подскажем под твою стену." },
-  { n: "03", t: "Делаем за 2–3 дня", d: "Печатаем на премиум-материале, собираем раму и LED-подсветку." },
-  { n: "04", t: "Доставляем по Баку", d: "Курьером за 1 день, по Азербайджану — почтой или транспортной." },
-];
+"use client";
+
+import { useTranslation } from "@/lib/i18n";
 
 export function Steps() {
+  const { t } = useTranslation();
+  
+  const ITEMS = [
+    { n: "01", t: t("steps.01.t"), d: t("steps.01.d") },
+    { n: "02", t: t("steps.02.t"), d: t("steps.02.d") },
+    { n: "03", t: t("steps.03.t"), d: t("steps.03.d") },
+    { n: "04", t: t("steps.04.t"), d: t("steps.04.d") },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {ITEMS.map((s) => (

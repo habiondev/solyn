@@ -7,6 +7,7 @@ import { formatPrice } from "@/lib/utils";
 import { Loader2, Check, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { useTranslation } from "@/lib/i18n";
 
 function buildWhatsAppText(items: ReturnType<typeof useCart>["items"], total: number, name: string, phone: string, address: string): string {
   const lines = items.map((it) => {
@@ -32,6 +33,7 @@ function buildWhatsAppText(items: ReturnType<typeof useCart>["items"], total: nu
 }
 
 export function CheckoutForm() {
+  const { t } = useTranslation();
   const { items, total, clear } = useCart();
   const { data: session } = useSession();
   const [loading, setLoading] = useState(false);
@@ -47,9 +49,9 @@ export function CheckoutForm() {
   if (items.length === 0 && !done) {
     return (
       <div className="pt-32 pb-16 container-x text-center">
-        <h1 className="h-section mb-3">Корзина пустая</h1>
-        <p className="text-muted mb-5">Добавьте товары из каталога.</p>
-        <Link href="/#products" className="btn">В каталог</Link>
+        <h1 className="h-section mb-3">{t("checkout.empty")}</h1>
+        <p className="text-muted mb-5">{t("checkout.empty_desc")}</p>
+        <Link href="/#products" className="btn">{t("checkout.back_to_catalog")}</Link>
       </div>
     );
   }
@@ -57,7 +59,7 @@ export function CheckoutForm() {
   /** Отправка через WhatsApp — без записи в БД, просто формируем сообщение и открываем чат. */
   const submitWhatsApp = () => {
     if (!form.customerName || !form.phone) {
-      return toast.error("Сначала заполните имя и телефон");
+      return toast.error(t("collab.modal.error"));
     }
     const text = buildWhatsAppText(items, total, form.customerName, form.phone, form.address);
     const url = `https://wa.me/994555508932?text=${text}`;
@@ -68,7 +70,7 @@ export function CheckoutForm() {
   const submitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.customerName || !form.phone) {
-      return toast.error("Заполните имя и телефон");
+      return toast.error(t("collab.modal.error"));
     }
     setLoading(true);
     try {
@@ -94,23 +96,23 @@ export function CheckoutForm() {
         <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-b from-neon-2 to-neon grid place-items-center mb-5">
           <Check className="h-7 w-7 text-inkDim" />
         </div>
-        <h1 className="h-section mb-2">Заказ оформлен!</h1>
+        <h1 className="h-section mb-2">{t("checkout.success.title")}</h1>
         <p className="text-muted mb-1">
-          Номер заказа: <b className="text-white">#{done.id.slice(-6).toUpperCase()}</b>
+          {t("checkout.success.order_num")}: <b className="text-white">#{done.id.slice(-6).toUpperCase()}</b>
         </p>
         <p className="text-muted mb-5">
-          Сумма: <b className="text-neon-2">{formatPrice(done.total)}</b>.
-          Мы свяжемся с вами в ближайшее время.
+          {t("checkout.success.amount")}: <b className="text-neon-2">{formatPrice(done.total)}</b>.
+          {t("checkout.success.contact_soon")}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
-          <Link href="/#products" className="btn-ghost">Продолжить покупки</Link>
+          <Link href="/#products" className="btn-ghost">{t("checkout.success.continue")}</Link>
           <a
             href={`https://wa.me/994555508932?text=Здравствуйте!%20У%20меня%20номер%20заказа%20%23${done.id.slice(-6).toUpperCase()}`}
             target="_blank"
             rel="noreferrer"
             className="btn text-sm"
           >
-            💬 Написать в WhatsApp
+            💬 {t("checkout.success.whatsapp")}
           </a>
         </div>
       </div>
@@ -119,23 +121,23 @@ export function CheckoutForm() {
 
   return (
     <div className="pt-24 pb-16 container-x">
-      <h1 className="h-section text-center mb-7">Оформление заказа</h1>
+      <h1 className="h-section text-center mb-7">{t("checkout.title")}</h1>
       <div className="grid lg:grid-cols-[1fr_380px] gap-6">
         {/* Форма */}
         <form onSubmit={submitForm} className="bg-card border border-line rounded-2xl p-5 grid gap-3">
-          <h2 className="font-display font-semibold mb-1">Ваши данные</h2>
+          <h2 className="font-display font-semibold mb-1">{t("checkout.customer_data")}</h2>
 
           <div className="grid sm:grid-cols-2 gap-3">
             <input
               required
-              placeholder="Ваше имя *"
+              placeholder={t("checkout.name")}
               value={form.customerName}
               onChange={(e) => setForm({ ...form, customerName: e.target.value })}
               className="input"
             />
             <input
               required
-              placeholder="Телефон (WhatsApp) *"
+              placeholder={t("checkout.phone")}
               type="tel"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -145,19 +147,19 @@ export function CheckoutForm() {
 
           <input
             type="email"
-            placeholder="Email (необязательно)"
+            placeholder={t("checkout.email")}
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
             className="input"
           />
           <input
-            placeholder="Адрес / город (необязательно)"
+            placeholder={t("checkout.address")}
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
             className="input"
           />
           <textarea
-            placeholder="Комментарий к заказу"
+            placeholder={t("checkout.comment")}
             value={form.comment}
             onChange={(e) => setForm({ ...form, comment: e.target.value })}
             rows={3}
@@ -171,7 +173,7 @@ export function CheckoutForm() {
               className="btn"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Подтвердить заказ
+              {t("checkout.submit")}
             </button>
             <button
               type="button"
@@ -179,15 +181,15 @@ export function CheckoutForm() {
               className="btn-ghost border-[#25d366]/40 text-[#25d366] hover:bg-[#25d366]/10"
             >
               <MessageCircle className="h-4 w-4 fill-[#25d366]" />
-              Написать в WhatsApp
+              {t("checkout.whatsapp")}
             </button>
           </div>
-          <div className="text-xs text-muted">При оформлении заказа — мы свяжемся с вами для подтверждения.</div>
+          <div className="text-xs text-muted">{t("checkout.hint")}</div>
         </form>
 
         {/* Сводка заказа */}
         <div className="bg-card border border-line rounded-2xl p-5 h-fit lg:sticky lg:top-24">
-          <h2 className="font-display font-semibold mb-3">Ваш заказ</h2>
+          <h2 className="font-display font-semibold mb-3">{t("checkout.your_order")}</h2>
           <div className="grid gap-2 max-h-64 overflow-auto pr-1">
             {items.map((it) => (
               <div key={it.id} className="flex items-center gap-2.5 text-sm">
@@ -200,9 +202,9 @@ export function CheckoutForm() {
                 <div className="flex-1 min-w-0">
                   <div className="truncate">{it.title}</div>
                   <div className="text-xs text-muted">
-                    {it.width && it.height ? `${it.width / 10}×${it.height / 10} см` : "стандарт"} · ×{it.quantity}
-                    {it.hasBacklight ? " · 💡 LED" : ""}
-                    {it.hasFrame ? " · 🖼 рамка" : ""}
+                    {it.width && it.height ? `${it.width / 10}×${it.height / 10} см` : t("cart.item.standard")} · ×{it.quantity}
+                    {it.hasBacklight ? ` · 💡 ${t("cart.item.glow")}` : ""}
+                    {it.hasFrame ? ` · 🖼 ${t("cart.item.frame")}` : ""}
                   </div>
                 </div>
                 <div className="font-display font-semibold">{formatPrice(it.price * it.quantity)}</div>
@@ -210,10 +212,10 @@ export function CheckoutForm() {
             ))}
           </div>
           <div className="border-t border-line mt-4 pt-4 flex items-center justify-between">
-            <span className="text-muted">Итого</span>
+            <span className="text-muted">{t("checkout.summary")}</span>
             <span className="font-display font-bold text-2xl">{formatPrice(total)}</span>
           </div>
-          <div className="text-xs text-muted mt-1">Доставка по Баку бесплатно от 200 ₼</div>
+          <div className="text-xs text-muted mt-1">{t("checkout.delivery_hint")}</div>
         </div>
       </div>
     </div>
